@@ -2,4 +2,11 @@
 	<Runtime>
 		<Import assembly="MonoDevelop.NuGetPackageExplorer.dll" />
 	</Runtime>
+
+	<Extension path="/MonoDevelop/Ide/DisplayBindings">
+		<DisplayBinding
+			id="NuGetPackageExplorer"
+			class="MonoDevelop.NuGetPackageExplorer.NuGetPackageDisplayBinding"
+			insertbefore="DefaultDisplayBinding" />
+	</Extension>
 </ExtensionModel>

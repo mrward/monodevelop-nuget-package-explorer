@@ -24,5 +24,9 @@
       <Private>False</Private>
       <HintPath>$(MDBinDir)\System.Collections.Immutable.dll</HintPath>
     </Reference>
+    <Reference Include="Xwt">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\Xwt.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
