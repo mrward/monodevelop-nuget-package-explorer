@@ -1,5 +1,5 @@
 ﻿//
-// PackageMetadataView.cs
+// NuGetPackageMetadataView.cs
 //
 // Author:
 //       Matt Ward <ward.matt@gmail.com>
@@ -35,7 +35,7 @@ using Xwt;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
-	public class PackageMetadataView : Widget
+	public class NuGetPackageMetadataView : Widget
 	{
 		VBox mainVBox;
 		Label packageId;
@@ -63,7 +63,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		HBox packageReferencesLabelHBox;
 		VBox packageReferencesVBox;
 
-		public PackageMetadataView ()
+		public NuGetPackageMetadataView ()
 		{
 			Build ();
 		}

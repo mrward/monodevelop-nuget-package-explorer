@@ -49,9 +49,11 @@
     <Compile Include="Properties\AddinInfo.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageDisplayBinding.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageView.cs" />
-    <Compile Include="MonoDevelop.NuGetPackageExplorer\PackageMetadataView.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageMetadataView.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuSpecReaderExtensions.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetFrameworkExtensions.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageContentsView.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageFilePath.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml" />

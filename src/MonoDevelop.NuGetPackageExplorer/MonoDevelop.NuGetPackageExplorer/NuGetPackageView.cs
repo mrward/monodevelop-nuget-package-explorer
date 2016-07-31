@@ -38,7 +38,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 	{
 		PackageArchiveReader reader;
 		VPaned pane;
-		PackageMetadataView packageMetadataView;
+		NuGetPackageMetadataView packageMetadataView;
+		NuGetPackageContentsView packageContentsTreeView;
 
 		public NuGetPackageView ()
 		{
@@ -60,6 +61,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 					Runtime.RunInMainThread (() => {
 						packageMetadataView.ShowMetadata (nuspecReader);
+						packageContentsTreeView.ShowContents (reader);
 					});
 				}
 			});
@@ -83,13 +85,13 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 			// Top pane.
 			var topScrollView = new ScrollView ();
-			packageMetadataView = new PackageMetadataView ();
+			packageMetadataView = new NuGetPackageMetadataView ();
 			topScrollView.Content = packageMetadataView;
 			pane.Panel1.Content = topScrollView;
 
 			// Bottom pane.
 			var bottomScrollView = new ScrollView ();
-			var packageContentsTreeView = new TreeView ();
+			packageContentsTreeView = new NuGetPackageContentsView ();
 			bottomScrollView.Content = packageContentsTreeView;
 			pane.Panel2.Content = bottomScrollView;
 		}
