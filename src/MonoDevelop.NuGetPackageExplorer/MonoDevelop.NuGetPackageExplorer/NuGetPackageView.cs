@@ -40,10 +40,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 		HPaned pane;
 		NuGetPackageMetadataView packageMetadataView;
 		NuGetPackageContentsView packageContentsTreeView;
+		NuSpecFileView nuspecFileView;
 
 		public NuGetPackageView ()
 		{
 			BuildView ();
+			nuspecFileView = new NuSpecFileView ();
 		}
 
 		public override Widget Widget {
@@ -62,13 +64,27 @@ namespace MonoDevelop.NuGetPackageExplorer
 					Runtime.RunInMainThread (() => {
 						packageMetadataView.ShowMetadata (nuspecReader);
 						packageContentsTreeView.ShowContents (reader);
+						nuspecFileView.ShowXml (nuspecReader.Xml);
 					});
 				}
 			});
 		}
 
+		public override string TabPageLabel {
+			get {
+				return GettextCatalog.GetString ("Package");
+			}
+		}
+
+		protected override void OnWorkbenchWindowChanged ()
+		{
+			if (WorkbenchWindow != null) {
+				WorkbenchWindow.AttachViewContent (nuspecFileView);
+			}
+		}
+
 		public override bool IsViewOnly {
-			get {return true; }
+			get { return true; }
 		}
 
 		public override void Dispose ()
