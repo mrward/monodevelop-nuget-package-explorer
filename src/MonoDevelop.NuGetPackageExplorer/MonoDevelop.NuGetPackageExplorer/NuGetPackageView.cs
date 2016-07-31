@@ -37,7 +37,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 	public class NuGetPackageView : AbstractXwtViewContent
 	{
 		PackageArchiveReader reader;
-		VPaned pane;
+		HPaned pane;
 		NuGetPackageMetadataView packageMetadataView;
 		NuGetPackageContentsView packageContentsTreeView;
 
@@ -81,7 +81,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 		void BuildView ()
 		{
-			pane = new VPaned ();
+			pane = new HPaned ();
 
 			// Top pane.
 			var topScrollView = new ScrollView ();
