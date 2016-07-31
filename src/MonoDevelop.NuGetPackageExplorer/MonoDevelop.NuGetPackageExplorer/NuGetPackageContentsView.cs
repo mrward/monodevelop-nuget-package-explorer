@@ -51,7 +51,6 @@ namespace MonoDevelop.NuGetPackageExplorer
 		public void ShowContents (PackageArchiveReader reader)
 		{
 			foreach (NuGetPackageFilePath file in GetFiles (reader)) {
-				System.Console.WriteLine (file.ToString ());
 				if (!file.IsInternalPackageFile ()) {
 					AddFile (file);
 				}
