@@ -1,6 +1,7 @@
 ﻿<ExtensionModel>
 	<Runtime>
 		<Import assembly="MonoDevelop.NuGetPackageExplorer.dll" />
+		<Import assembly="NuGet.exe" />
 	</Runtime>
 
 	<Extension path="/MonoDevelop/Ide/DisplayBindings">
