@@ -10,4 +10,15 @@
 			class="MonoDevelop.NuGetPackageExplorer.NuGetPackageDisplayBinding"
 			insertbefore="DefaultDisplayBinding" />
 	</Extension>
+	
+	<Extension path="/MonoDevelop/Ide/FileFilters">
+		<FileFilter
+			id="NuGetPackageFiles"
+			_label="NuGet Package Files"
+			extensions="*.nupkg" />
+		<FileFilter
+			id="NuSpecFiles"
+			_label="NuSpec Files"
+			extensions="*.nuspec" />
+	</Extension>
 </ExtensionModel>
