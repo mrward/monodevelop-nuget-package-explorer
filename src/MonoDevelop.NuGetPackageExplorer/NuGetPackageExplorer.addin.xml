@@ -21,4 +21,15 @@
 			_label="NuSpec Files"
 			extensions="*.nuspec" />
 	</Extension>
+
+	<Extension path="/MonoDevelop/Core/MimeTypes">
+		<MimeType
+			id="application/nuspec+xml"
+			baseType="application/xml"
+			icon="md-xml-file-icon"
+			_description="NuSpec files"
+			isText="true">
+			<File pattern="*.nuspec" />
+		</MimeType>
+	</Extension>
 </ExtensionModel>
