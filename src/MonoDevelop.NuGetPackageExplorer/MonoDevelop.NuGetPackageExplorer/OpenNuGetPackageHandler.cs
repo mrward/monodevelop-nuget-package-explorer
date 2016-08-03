@@ -1,5 +1,5 @@
 ﻿//
-// AddinInfo.cs
+// OpenNuGetPackageHandler.cs
 //
 // Author:
 //       Matt Ward <ward.matt@gmail.com>
@@ -25,17 +25,46 @@
 // THE SOFTWARE.
 //
 
-using Mono.Addins;
+using System;
+using MonoDevelop.Components.Commands;
+using MonoDevelop.Core;
+using MonoDevelop.Ide;
 
-[assembly:Addin ("NuGetPackageExplorer",
-                 Namespace = "MonoDevelop",
-                 Version = "0.1",
-                 Category = "IDE extensions")]
+namespace MonoDevelop.NuGetPackageExplorer
+{
+	public class OpenNuGetPackageHandler : CommandHandler
+	{
+		PackageReferenceNode packageReferenceNode;
+		string solutionDirectory;
 
-[assembly:AddinName ("NuGet Package Explorer")]
-[assembly:AddinDescription ("Open and view NuGet packages (.nupkg)")]
+		protected override void Update (CommandInfo info)
+		{
+			solutionDirectory = IdeApp.ProjectOperations.CurrentSelectedSolution?.BaseDirectory;
 
-[assembly:AddinDependency ("Core", "6.0")]
-[assembly:AddinDependency ("Ide", "6.0")]
-[assembly:AddinDependency ("PackageManagement", "6.0")]
+			packageReferenceNode = PackageReferenceNode.GetSelectedNode ();
+			info.Enabled = solutionDirectory != null &&
+				packageReferenceNode != null &&
+				packageReferenceNode.IsRestored;
+		}
+
+		protected override void Run ()
+		{
+			try {
+				OpenNuGetPackage ();
+			} catch (Exception ex) {
+				LoggingService.LogError ("Unable to open NuGet package.", ex);
+				MessageService.ShowError ("Unable to open NuGet package.");
+			}
+		}
+
+		void OpenNuGetPackage ()
+		{
+			string path = NuGetPackageLocator.GetNuGetPackagePath (
+				solutionDirectory,
+				packageReferenceNode.Identity);
+
+			IdeApp.Workbench.OpenDocument (path, null, true);
+		}
+	}
+}
 

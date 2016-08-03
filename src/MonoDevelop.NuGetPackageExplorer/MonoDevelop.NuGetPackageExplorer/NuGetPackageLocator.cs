@@ -1,5 +1,5 @@
 ﻿//
-// AddinInfo.cs
+// NuGetPackageLocator.cs
 //
 // Author:
 //       Matt Ward <ward.matt@gmail.com>
@@ -24,18 +24,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
+using MonoDevelop.Core;
+using NuGet.PackageManagement;
+using NuGet.ProjectManagement;
+using NuGet.Configuration;
+using NuGet.Packaging.Core;
 
-using Mono.Addins;
+namespace MonoDevelop.NuGetPackageExplorer
+{
+	public class NuGetPackageLocator
+	{
+		public static string GetNuGetPackagePath (string solutionDirectory, PackageIdentity packageIdentity)
+		{
+			var settings = Settings.LoadDefaultSettings (solutionDirectory, null, null);
+			string path = PackagesFolderPathUtility.GetPackagesFolderPath (solutionDirectory, settings);
+			string fullPath = new FilePath (path).FullPath;
 
-[assembly:Addin ("NuGetPackageExplorer",
-                 Namespace = "MonoDevelop",
-                 Version = "0.1",
-                 Category = "IDE extensions")]
-
-[assembly:AddinName ("NuGet Package Explorer")]
-[assembly:AddinDescription ("Open and view NuGet packages (.nupkg)")]
-
-[assembly:AddinDependency ("Core", "6.0")]
-[assembly:AddinDependency ("Ide", "6.0")]
-[assembly:AddinDependency ("PackageManagement", "6.0")]
+			var folder = new FolderNuGetProject (fullPath);
+			return folder.GetInstalledPackageFilePath (packageIdentity);
+		}
+	}
+}
 

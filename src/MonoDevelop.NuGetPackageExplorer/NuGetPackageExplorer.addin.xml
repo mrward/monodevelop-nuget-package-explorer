@@ -32,4 +32,19 @@
 			<File pattern="*.nuspec" />
 		</MimeType>
 	</Extension>
+
+	<Extension path="/MonoDevelop/Ide/Commands">
+		<Category _name="NuGet" id="NuGet">
+			<Command
+				id="MonoDevelop.PackageExplorer.Commands.OpenPackage"
+				_description="Open NuGet package"
+				_label="Open Package"
+				defaultHandler="MonoDevelop.NuGetPackageExplorer.OpenNuGetPackageHandler" />
+		</Category>
+	</Extension>
+
+	<Extension path="/MonoDevelop/PackageManagement/ContextMenu/ProjectPad/PackageReference">
+		<SeparatorItem id="OpenNuGetPackageSeparator" />
+		<CommandItem id="MonoDevelop.PackageExplorer.Commands.OpenPackage" />
+	</Extension>
 </ExtensionModel>

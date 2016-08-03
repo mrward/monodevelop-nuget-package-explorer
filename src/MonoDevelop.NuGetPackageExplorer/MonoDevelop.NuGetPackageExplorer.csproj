@@ -55,6 +55,9 @@
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageContentsView.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageFilePath.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuSpecFileView.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\OpenNuGetPackageHandler.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\PackageReferenceNode.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageLocator.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml" />
