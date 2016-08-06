@@ -43,6 +43,18 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="Mono.Posix, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net">
+      <HintPath>..\packages\Lucene.Net.3.0.3\lib\NET40\Lucene.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cairo, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -58,9 +70,116 @@
     <Compile Include="MonoDevelop.NuGetPackageExplorer\OpenNuGetPackageHandler.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\PackageReferenceNode.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\NuGetPackageLocator.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\AddPackagesDialog.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\AddPackagesDialog.UI.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\DialogExtensions.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\PackageCellView.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\PackageCellViewCheckBox.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\PackageCellViewEventArgs.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\Styles.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\AllPackagesViewModel.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\ImageLoadedEventArgs.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\ImageLoader.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\PackageSearchResultViewModel.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\SourceRepositoryViewModel.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\ViewModelBase.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\DetailControlModel.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\DetailedPackageMetadata.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\DisplayVersion.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\FeedSearchContinuationToken.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\IItemLoader.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\INuGetUILogger.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\IPackageFeed.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\IPackageMetadataProvider.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\LoadingStatus.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\MultiSourcePackageFeed.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\MultiSourcePackageMetadataProvider.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageDependencyMetadata.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageDependentSetMetadata.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageDetailControlModel.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageItemListViewModel.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageItemLoader.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageLoadContext.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\PackageStatus.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\SearchResult.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\SourceRepositoryExtensions.cs" />
+    <Compile Include="NuGet.PackageManagement.UI\TaskCombinators.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\ImageCache.cs" />
+    <Compile Include="NuGet.Indexing\DownloadCountResultsIndexer.cs" />
+    <Compile Include="NuGet.Indexing\ISearchResultsAggregator.cs" />
+    <Compile Include="NuGet.Indexing\ISearchResultsIndexer.cs" />
+    <Compile Include="NuGet.Indexing\PackageAnalyzer.cs" />
+    <Compile Include="NuGet.Indexing\RelevanceSearchResultsIndexer.cs" />
+    <Compile Include="NuGet.Indexing\SearchResultsAggregator.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\DeleteOnRestartManager.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\AggregateSourceRepositoryViewModel.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\AggregatePackageSourceErrorMessage.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\BackgroundDispatcher.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\NuGetProjectContext.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\MonoDevelopCommonOperations.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\IMonoDevelopSolutionManager.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\MonoDevelopSolutionManager.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\SolutionExtensions.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\MonoDevelopNuGetProjectFactory.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\SettingsLoader.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\MonoDevelopMSBuildNuGetProjectSystem.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\BuildIntegrationProjectSystem.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\ProjectTargetFramework.cs" />
+    <Compile Include="NuGet.Indexing\CamelCaseFilter.cs" />
+    <Compile Include="NuGet.Indexing\DotTokenizer.cs" />
+    <Compile Include="NuGet.Indexing\IdentifierAnalyzer.cs" />
+    <Compile Include="NuGet.Indexing\IdentifierKeywordAnalyzer.cs" />
+    <Compile Include="NuGet.Indexing\NuGetQuery.cs" />
+    <Compile Include="NuGet.Indexing\OwnerAnalyzer.cs" />
+    <Compile Include="NuGet.Indexing\SemanticVersionFilter.cs" />
+    <Compile Include="NuGet.Indexing\TagsAnalyzer.cs" />
+    <Compile Include="NuGet.Indexing\TokenizingHelper.cs" />
+    <Compile Include="NuGet.Indexing\VersionAnalyzer.cs" />
+    <Compile Include="NuGet.Indexing\DescriptionAnalyzer.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\SourceRepositoryProvider.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\MonoDevelopPackageSourceProvider.cs" />
+    <Compile Include="NuGet.Protocol.VisualStudio\PackageMetadataResourceLocalProvider.cs" />
+    <Compile Include="NuGet.Protocol.VisualStudio\PackageSearchResourceLocalProvider.cs" />
+    <Compile Include="NuGet.Protocol.VisualStudio\PackageSearchResourceLocal.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\PackageListViewTextFormatter.cs" />
+    <Compile Include="NuGet.Protocol.VisualStudio\PackageMetadataResourceLocal.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\AggregateExceptionErrorMessage.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\PackageSearchResultViewModelComparer.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\OpenNuGetPackageFromSourceHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml" />
+    <EmbeddedResource Include="Icons\package-48.png">
+      <LogicalName>package-48.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48%402x.png">
+      <LogicalName>package-48@2x.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48~dark.png">
+      <LogicalName>package-48~dark.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48~dark%402x.png">
+      <LogicalName>package-48~dark@2x.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48~dark~sel.png">
+      <LogicalName>package-48~dark~sel.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48~sel.png">
+      <LogicalName>package-48~sel.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48~sel%402x.png">
+      <LogicalName>package-48~sel@2x.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\package-48~dark~sel%402x.png">
+      <LogicalName>package-48~dark~sel@2x.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NuGet.Indexing\" />
+    <Folder Include="Icons\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="MonoDevelop.References.proj" />

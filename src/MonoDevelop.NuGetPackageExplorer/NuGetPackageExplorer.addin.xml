@@ -40,11 +40,23 @@
 				_description="Open NuGet package"
 				_label="Open Package"
 				defaultHandler="MonoDevelop.NuGetPackageExplorer.OpenNuGetPackageHandler" />
+			<Command
+				id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource"
+				_description="Open NuGet package from a package source"
+				_label="Open Package..."
+				defaultHandler="MonoDevelop.NuGetPackageExplorer.OpenNuGetPackageFromSourceHandler" />
 		</Category>
 	</Extension>
 
 	<Extension path="/MonoDevelop/PackageManagement/ContextMenu/ProjectPad/PackageReference">
 		<SeparatorItem id="OpenNuGetPackageSeparator" />
 		<CommandItem id="MonoDevelop.PackageExplorer.Commands.OpenPackage" />
+	</Extension>
+
+	<Extension path="/MonoDevelop/Ide/ContextMenu/ProjectPad">
+		<Condition id="ItemType" value="MonoDevelop.PackageManagement.NodeBuilders.ProjectPackagesFolderNode">
+			<SeparatorItem id="OpenNuGetPackageFromSourceSeparator" />
+			<CommandItem id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource" />
+		</Condition>
 	</Extension>
 </ExtensionModel>
