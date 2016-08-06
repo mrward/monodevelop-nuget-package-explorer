@@ -29,15 +29,27 @@ using NuGet.PackageManagement;
 using NuGet.ProjectManagement;
 using NuGet.Configuration;
 using NuGet.Packaging.Core;
+using MonoDevelop.Projects;
+using NuGet.Common;
+using System.IO;
+using NuGet.Packaging;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class NuGetPackageLocator
 	{
-		public static string GetNuGetPackagePath (string solutionDirectory, PackageIdentity packageIdentity)
+		public static string GetNuGetPackagePath (Project project, PackageIdentity packageIdentity)
 		{
-			var settings = Settings.LoadDefaultSettings (solutionDirectory, null, null);
-			string path = PackagesFolderPathUtility.GetPackagesFolderPath (solutionDirectory, settings);
+			var settings = Settings.LoadDefaultSettings (project.ParentSolution.BaseDirectory, null, null);
+
+			string projectJsonPath = ProjectJsonPathUtilities.GetProjectConfigPath (project.BaseDirectory, project.Name);
+			if (File.Exists (projectJsonPath)) {
+				string globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder (settings); 
+				var packagePathResolver = new VersionFolderPathResolver (globalPackagesFolder, normalizePackageId: false);
+				return packagePathResolver.GetPackageFilePath (packageIdentity.Id, packageIdentity.Version);
+			}
+
+			string path = PackagesFolderPathUtility.GetPackagesFolderPath (project.ParentSolution.BaseDirectory, settings);
 			string fullPath = new FilePath (path).FullPath;
 
 			var folder = new FolderNuGetProject (fullPath);

@@ -29,20 +29,21 @@ using System;
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
+using MonoDevelop.Projects;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class OpenNuGetPackageHandler : CommandHandler
 	{
 		PackageReferenceNode packageReferenceNode;
-		string solutionDirectory;
+		Project project;
 
 		protected override void Update (CommandInfo info)
 		{
-			solutionDirectory = IdeApp.ProjectOperations.CurrentSelectedSolution?.BaseDirectory;
+			project = IdeApp.ProjectOperations.CurrentSelectedProject;
 
 			packageReferenceNode = PackageReferenceNode.GetSelectedNode ();
-			info.Enabled = solutionDirectory != null &&
+			info.Enabled = project != null &&
 				packageReferenceNode != null &&
 				packageReferenceNode.IsRestored;
 		}
@@ -60,7 +61,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		void OpenNuGetPackage ()
 		{
 			string path = NuGetPackageLocator.GetNuGetPackagePath (
-				solutionDirectory,
+				project,
 				packageReferenceNode.Identity);
 
 			IdeApp.Workbench.OpenDocument (path, null, true);
