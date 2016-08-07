@@ -43,7 +43,7 @@
 			<Command
 				id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource"
 				_description="Opens a NuGet package from a package source"
-				_label="Open NuGet package..."
+				_label="Open NuGet Package..."
 				defaultHandler="MonoDevelop.NuGetPackageExplorer.OpenNuGetPackageFromSourceHandler" />
 		</Category>
 	</Extension>
