@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MonoDevelop.Core;
 using NuGet.Packaging;
 using Xwt;
 
@@ -37,15 +38,23 @@ namespace MonoDevelop.NuGetPackageExplorer
 	{
 		TreeStore treeStore;
 		DataField<string> nameField;
+		DataField<string> fileField;
+		Menu contextMenu = new Menu ();
 
 		public NuGetPackageContentsView ()
 		{
 			nameField = new DataField<string> ();
-			treeStore = new TreeStore (nameField);
+			fileField = new DataField<string> ();
+			treeStore = new TreeStore (nameField, fileField);
 
 			DataSource = treeStore;
 			Columns.Add ("Name", nameField);
+
 			HeadersVisible = false;
+
+			var openFileMenuItem = new MenuItem (GettextCatalog.GetString ("Open"));
+			openFileMenuItem.Clicked += OpenFileMenuItemClicked;
+			contextMenu.Items.Add (openFileMenuItem);
 		}
 
 		public void ShowContents (PackageReaderBase reader)
@@ -86,9 +95,11 @@ namespace MonoDevelop.NuGetPackageExplorer
 				TreeNavigator parent = GetTreeNode (file.Directories);
 				TreeNavigator fileNode = parent.AddChild ();
 				fileNode.SetValue (nameField, file.FileName);
+				fileNode.SetValue (fileField, file.ToString ());
 			} else {
 				TreeNavigator fileNode = treeStore.AddNode ();
 				fileNode.SetValue (nameField, file.ToString ());
+				fileNode.SetValue (fileField, file.ToString ());
 			}
 		}
 
@@ -159,6 +170,59 @@ namespace MonoDevelop.NuGetPackageExplorer
 			}
 
 			return null;
+		}
+
+		protected override void OnRowActivated (TreeViewRowEventArgs a)
+		{
+			base.OnRowActivated (a);
+
+			OpenSelectedFile ();
+		}
+
+		protected override void OnButtonPressed (ButtonEventArgs args)
+		{
+			base.OnButtonPressed (args);
+
+			if (args.Button != PointerButton.Right) {
+				return;
+			}
+
+			TreePosition treePosition;
+			RowDropPosition rowDropPosition;
+			if (GetDropTargetRow (args.X, args.Y, out rowDropPosition, out treePosition)) {
+				string file = GetFile (treePosition);
+				if (file != null) {
+					contextMenu.Popup (this, args.X, args.Y);
+				}
+			}
+		}
+
+		string GetFile (TreePosition position)
+		{
+			TreeNavigator node = treeStore.GetNavigatorAt (position);
+			if (node != null) {
+				return node.GetValue (fileField);
+			}
+			return null;
+		}
+
+		public Action<string> OnOpenFile = file => { };
+
+		void OpenFileMenuItemClicked (object sender, EventArgs e)
+		{
+			OpenSelectedFile ();
+		}
+
+		void OpenSelectedFile ()
+		{
+			try {
+				string file = GetFile (SelectedRow);
+				if (file != null) {
+					OnOpenFile (file);
+				}
+			} catch (Exception ex) {
+				LoggingService.LogError ("Unable to open file.", ex);
+			}
 		}
 	}
 }

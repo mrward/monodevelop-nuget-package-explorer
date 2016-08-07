@@ -31,6 +31,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoDevelop.Core;
+using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
 using MonoDevelop.PackageManagement;
 using NuGet.Configuration;
@@ -51,6 +52,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		NuGetPackageContentsView packageContentsTreeView;
 		NuSpecFileView nuspecFileView;
 		CancellationTokenSource tokenSource;
+		string packageExtractTempDirectory;
 
 		public NuGetPackageView ()
 		{
@@ -67,14 +69,13 @@ namespace MonoDevelop.NuGetPackageExplorer
 			ContentName = fileOpenInformation.FileName;
 
 			return Task.Run (() => {
-				using (var stream = File.OpenRead (fileOpenInformation.FileName)) {
-					reader = new PackageArchiveReader (stream);
-					var nuspecReader = new NuspecReader (reader.GetNuspec ());
+				var stream = File.OpenRead (fileOpenInformation.FileName);
+				reader = new PackageArchiveReader (stream, leaveStreamOpen: true);
+				var nuspecReader = new NuspecReader (reader.GetNuspec ());
 
-					Runtime.RunInMainThread (() => {
-						ShowMetadata (nuspecReader);
-					});
-				}
+				Runtime.RunInMainThread (() => {
+					ShowMetadata (nuspecReader);
+				});
 			});
 		}
 
@@ -130,6 +131,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			// Bottom pane.
 			var bottomScrollView = new ScrollView ();
 			packageContentsTreeView = new NuGetPackageContentsView ();
+			packageContentsTreeView.OnOpenFile = OnOpenPackageFile;
 			bottomScrollView.Content = packageContentsTreeView;
 			pane.Panel2.Content = bottomScrollView;
 		}
@@ -191,6 +193,50 @@ namespace MonoDevelop.NuGetPackageExplorer
 			} catch (Exception ex) {
 				LoggingService.LogError ("Unable to open package dependency.", ex);
 			}
+		}
+
+		void OnOpenPackageFile (string packageFile)
+		{
+			try {
+				foreach (string extractedFile in ExtractFilesFromPackage (packageFile)) {
+					IdeApp.Workbench.OpenDocument (extractedFile, null, true);
+				}
+
+			} catch (Exception ex) {
+				LoggingService.LogError ("Unable to open file.", ex);
+			}
+		}
+
+		IEnumerable<string> ExtractFilesFromPackage (string packageFile)
+		{
+			return reader.CopyFiles (
+				GetPackageExtractDirectory (),
+				new [] { packageFile },
+				ExtractFile,
+				CancellationToken.None);
+		}
+
+		string GetPackageExtractDirectory ()
+		{
+			if (packageExtractTempDirectory == null) {
+				packageExtractTempDirectory = Path.Combine (
+					Path.GetTempPath (),
+					"MonoDevelop.NuGetExplorer",
+					Guid.NewGuid ().ToString ());
+			}
+
+			return packageExtractTempDirectory;
+		}
+
+		string ExtractFile (string sourceFile, string targetPath, Stream fileStream)
+		{
+			Directory.CreateDirectory (Path.GetDirectoryName (targetPath));
+
+			using (FileStream outputStream = File.Create (targetPath)) {
+				fileStream.CopyTo (outputStream);
+			}
+
+			return targetPath;
 		}
 	}
 }
