@@ -88,8 +88,6 @@ namespace MonoDevelop.PackageManagement
 			if (project.ParentSolution != null)
 				return project.ParentSolution.BaseDirectory;
 
-			LoggingService.LogWarning ("Project has no solution. Using project directory as base directory for NuGet. Project: '{0}'", project.FileName);
-
 			return project.BaseDirectory;
 		}
 	}

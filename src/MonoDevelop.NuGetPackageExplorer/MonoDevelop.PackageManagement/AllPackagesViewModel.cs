@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
+using MonoDevelop.NuGetPackageExplorer;
 using MonoDevelop.Projects;
 using NuGet.Configuration;
 using NuGet.PackageManagement;
@@ -63,7 +64,10 @@ namespace MonoDevelop.PackageManagement
 		public static AllPackagesViewModel Create ()
 		{
 			var solutionManager = new MonoDevelopSolutionManager (IdeApp.ProjectOperations.CurrentSelectedSolution);
-			var dotNetProject = (DotNetProject)IdeApp.ProjectOperations.CurrentSelectedProject;
+			var dotNetProject = IdeApp.ProjectOperations.CurrentSelectedProject as DotNetProject;
+			if (dotNetProject == null) {
+				dotNetProject = new DummyDotNetProject ();
+			}
 			return new AllPackagesViewModel (solutionManager, dotNetProject);
 		}
 
@@ -97,7 +101,6 @@ namespace MonoDevelop.PackageManagement
 			);
 
 			nugetProject = solutionManager.GetNuGetProject (dotNetProject);
-			GetPackagesInstalledInProject ();
 		}
 
 		public NuGetProject NuGetProject { 
@@ -106,6 +109,10 @@ namespace MonoDevelop.PackageManagement
 
 		public DotNetProject Project {
 			get { return dotNetProject; }
+		}
+
+		public ISettings Settings {
+			get { return solutionManager.Settings; }
 		}
 
 		public string SearchTerms { get; set; }
@@ -461,13 +468,6 @@ namespace MonoDevelop.PackageManagement
 		{
 			return packageReference.PackageIdentity.Id == id &&
 				packageReference.PackageIdentity.Version < version;
-		}
-
-		protected virtual Task GetPackagesInstalledInProject ()
-		{
-			return nugetProject
-				.GetInstalledPackagesAsync (CancellationToken.None)
-				.ContinueWith (task => OnReadInstalledPackages (task), TaskScheduler.FromCurrentSynchronizationContext ());
 		}
 
 		void OnReadInstalledPackages (Task<IEnumerable<PackageReference>> task)

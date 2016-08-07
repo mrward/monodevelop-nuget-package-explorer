@@ -31,6 +31,7 @@ using Mono.Unix;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Projects;
+using NuGet.Configuration;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Xwt;
@@ -98,6 +99,10 @@ namespace MonoDevelop.PackageManagement
 				return Enumerable.Empty <SourceRepository> ();
 
 			return viewModel.SelectedPackageSource.GetSourceRepositories ();
+		}
+
+		public ISettings Settings {
+			get { return viewModel.Settings; }
 		}
 
 		protected override void Dispose (bool disposing)

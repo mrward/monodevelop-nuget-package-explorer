@@ -32,21 +32,13 @@ using MonoDevelop.Components.Commands;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.PackageManagement;
-using MonoDevelop.Projects;
+using NuGet.Configuration;
 using NuGet.Protocol.Core.Types;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class OpenNuGetPackageFromSourceHandler : CommandHandler
 	{
-		DotNetProject project;
-
-		protected override void Update (CommandInfo info)
-		{
-			project = IdeApp.ProjectOperations.CurrentSelectedProject as DotNetProject;
-			info.Enabled = project != null;
-		}
-
 		protected override void Run ()
 		{
 			try {
@@ -54,6 +46,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 				bool configurePackageSources = false;
 				IEnumerable<PackageSearchResultViewModel> packages = null;
 				IEnumerable<SourceRepository> repositories = null;
+				ISettings settings = null;
 				do {
 					using (AddPackagesDialog dialog = CreateDialog (initialSearch)) {
 						dialog.ShowWithParent ();
@@ -61,11 +54,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 						initialSearch = dialog.SearchText;
 						packages = dialog.SelectedPackages;
 						repositories = dialog.GetSourceRepositories ();
+						settings = dialog.Settings;
 					}
 					if (configurePackageSources) {
 						ShowPreferencesForPackageSources ();
 					} else {
-						OpenPackages (packages, repositories);
+						OpenPackages (packages, repositories, settings);
 					}
 				} while (configurePackageSources);
 
@@ -87,12 +81,13 @@ namespace MonoDevelop.NuGetPackageExplorer
 			IdeApp.Workbench.ShowGlobalPreferencesDialog (null, "PackageSources");
 		}
 
-		void OpenPackages (IEnumerable<PackageSearchResultViewModel> packages, IEnumerable<SourceRepository> repositories)
+		void OpenPackages (
+			IEnumerable<PackageSearchResultViewModel> packages,
+			IEnumerable<SourceRepository> repositories,
+			ISettings settings)
 		{
 			if (!packages.Any ())
 				return;
-
-			var settings = SettingsLoader.LoadDefaultSettings (project.ParentSolution.BaseDirectory);
 
 			foreach (PackageSearchResultViewModel package in packages) {
 				package.Parent = null;

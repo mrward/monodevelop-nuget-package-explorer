@@ -42,8 +42,8 @@
 				defaultHandler="MonoDevelop.NuGetPackageExplorer.OpenNuGetPackageHandler" />
 			<Command
 				id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource"
-				_description="Open NuGet package from a package source"
-				_label="Open Package..."
+				_description="Opens a NuGet package from a package source"
+				_label="Open NuGet package..."
 				defaultHandler="MonoDevelop.NuGetPackageExplorer.OpenNuGetPackageFromSourceHandler" />
 		</Category>
 	</Extension>
@@ -56,7 +56,16 @@
 	<Extension path="/MonoDevelop/Ide/ContextMenu/ProjectPad">
 		<Condition id="ItemType" value="MonoDevelop.PackageManagement.NodeBuilders.ProjectPackagesFolderNode">
 			<SeparatorItem id="OpenNuGetPackageFromSourceSeparator" />
-			<CommandItem id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource" />
+			<CommandItem
+				id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource"
+				_label="Open Package..." />
 		</Condition>
+	</Extension>
+
+	<Extension path="/MonoDevelop/Ide/MainMenu/File">
+		<CommandItem
+			id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource"
+			insertbefore="OpenSep"
+			insertafter="MonoDevelop.Ide.Commands.FileCommands.OpenFile" />
 	</Extension>
 </ExtensionModel>

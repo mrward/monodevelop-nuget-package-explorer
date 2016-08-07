@@ -77,7 +77,7 @@ namespace MonoDevelop.PackageManagement
 		public INuGetProjectContext NuGetProjectContext { get; set; }
 
 		public string SolutionDirectory {
-			get { return Solution.BaseDirectory; }
+			get { return Solution?.BaseDirectory ?? Environment.GetFolderPath (Environment.SpecialFolder.UserProfile); }
 		}
 
 		#pragma warning disable 67
@@ -145,7 +145,10 @@ namespace MonoDevelop.PackageManagement
 
 		void LoadSettings ()
 		{
-			string rootDirectory = Path.Combine (Solution.BaseDirectory, ".nuget");
+			string rootDirectory = null;
+			if (Solution != null) {
+				rootDirectory = Path.Combine (Solution.BaseDirectory, ".nuget");
+			}
 			Settings = SettingsLoader.LoadDefaultSettings (rootDirectory, reportError: true);
 		}
 	}
