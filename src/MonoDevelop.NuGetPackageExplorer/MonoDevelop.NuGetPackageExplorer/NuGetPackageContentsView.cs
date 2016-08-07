@@ -48,7 +48,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			HeadersVisible = false;
 		}
 
-		public void ShowContents (PackageArchiveReader reader)
+		public void ShowContents (PackageReaderBase reader)
 		{
 			foreach (NuGetPackageFilePath file in GetFiles (reader)) {
 				if (!file.IsInternalPackageFile ()) {
@@ -57,7 +57,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			}
 		}
 
-		IEnumerable<NuGetPackageFilePath> GetFiles (PackageArchiveReader reader)
+		IEnumerable<NuGetPackageFilePath> GetFiles (PackageReaderBase reader)
 		{
 			var files = reader
 				.GetFiles ()

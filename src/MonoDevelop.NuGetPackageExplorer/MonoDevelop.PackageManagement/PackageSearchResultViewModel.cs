@@ -61,6 +61,10 @@ namespace MonoDevelop.PackageManagement
 			SelectedVersion = Version;
 		}
 
+		public DetailedPackageMetadata PackageMetadata {
+			get { return packageDetailModel?.PackageMetadata; }
+		}
+
 		public AllPackagesViewModel Parent {
 			get { return parent; }
 			set { parent = value; }

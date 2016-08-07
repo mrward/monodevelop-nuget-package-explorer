@@ -26,8 +26,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Core;
+using MonoDevelop.PackageManagement;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
@@ -38,6 +40,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 	public class NuGetPackageMetadataView : Widget
 	{
 		VBox mainVBox;
+		HBox errorHBox;
+		Label errorLabel;
+		HBox downloadingHBox;
+		Button cancelDownloadButton;
 		Label packageId;
 		Label packageVersion;
 		Label packageTitle;
@@ -68,11 +74,30 @@ namespace MonoDevelop.NuGetPackageExplorer
 			Build ();
 		}
 
+		public Action OnCancelDownload = () => { };
+
 		void Build ()
 		{
 			mainVBox = new VBox ();
 			mainVBox.Margin = 10;
 			Content = mainVBox;
+
+			errorHBox = new HBox ();
+			errorLabel = new Label ();
+			errorHBox.PackStart (errorLabel);
+			mainVBox.PackStart (errorHBox);
+			errorHBox.Visible = false;
+
+			downloadingHBox = new HBox ();
+			var downloadingLabel = new Label ();
+			downloadingLabel.Text = GettextCatalog.GetString ("Downloading...");
+			downloadingHBox.PackStart (downloadingLabel);
+			cancelDownloadButton = new Button ();
+			cancelDownloadButton.Label = GettextCatalog.GetString ("Cancel");
+			cancelDownloadButton.Clicked += CancelDownloadButtonClicked;
+			downloadingHBox.PackStart (cancelDownloadButton);
+			mainVBox.PackStart (downloadingHBox);
+			downloadingHBox.Visible = false;
 
 			packageId = AddMetadata (GettextCatalog.GetString ("Id"));
 			packageVersion = AddMetadata (GettextCatalog.GetString ("Version"));
@@ -180,9 +205,9 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageOwners.Text = reader.GetMetadataValue ("owners");
 			packageRequireLicenseAcceptance.Text = reader.GetMetadataValue ("requireLicenseAcceptance");
 			packageDevelopmentDependency.Text = reader.GetDevelopmentDependency ().ToString ();
-			UpdateLinkLabel (reader, packageLicenseUrl, "licenseUrl");
-			UpdateLinkLabel (reader, packageProjectUrl, "projectUrl");
-			UpdateLinkLabel (reader, packageIconUrl, "iconUrl");
+			UpdateLinkLabel (packageLicenseUrl, reader, "licenseUrl");
+			UpdateLinkLabel (packageProjectUrl, reader, "projectUrl");
+			UpdateLinkLabel (packageIconUrl, reader, "iconUrl");
 			packageSummary.Text = reader.GetMetadataValue ("summary");
 			packageSummaryHBox.Visible = !String.IsNullOrEmpty (packageSummary.Text);
 			packageDescription.Text = reader.GetMetadataValue ("description");
@@ -198,20 +223,58 @@ namespace MonoDevelop.NuGetPackageExplorer
 				packageMinClientVersion.Text = version.ToNormalizedString ();
 		}
 
-		static void UpdateLinkLabel (NuspecReader reader, LinkLabel label, string metadataName)
+		internal void ShowMetadata (PackageSearchResultViewModel package)
+		{
+			packageId.Text = package.Id;
+			packageVersion.Text = package.Version.ToNormalizedString ();
+			packageTitle.Text = package.Title;
+			packageAuthors.Text = package.Author;
+			packageOwners.Text = package.PackageMetadata?.Owners ?? string.Empty;
+			packageSummary.Text = package.Summary;
+			packageSummaryHBox.Visible = !String.IsNullOrEmpty (packageSummary.Text);
+			packageDescription.Text = package.Description;
+			packageTags.Text = package.PackageMetadata?.Tags ?? string.Empty;
+
+			UpdateLinkLabel (packageLicenseUrl, package.LicenseUrl);
+			UpdateLinkLabel (packageProjectUrl, package.ProjectUrl);
+			UpdateLinkLabel (packageIconUrl, package.IconUrl);
+
+			if (package.PackageMetadata?.HasDependencies == true) {
+				ShowDependencies (package.PackageMetadata.DependencySets.Select (d => d.DependencyGroup));
+			}
+		}
+
+		static void UpdateLinkLabel (LinkLabel label, NuspecReader reader, string metadataName)
 		{
 			string url = reader.GetMetadataValue (metadataName);
+			UpdateLinkLabel (label, url);
+		}
 
-			if (!string.IsNullOrEmpty (url))
-			{
-				label.Uri = new Uri (url);
-				label.Text = url;
+		static void UpdateLinkLabel (LinkLabel label, string url)
+		{
+			if (!string.IsNullOrEmpty (url)) {
+				UpdateLinkLabel (label, new Uri (url));
+			}
+		}
+
+		static void UpdateLinkLabel (LinkLabel label, Uri url)
+		{
+			if (url != null) {
+				label.Uri = url;
+				label.Text = url.ToString ();
 			}
 		}
 
 		void ShowDependencies (NuspecReader reader)
 		{
 			var dependencyGroups = reader.GetDependencyGroups ().ToArray ();
+			ShowDependencies (dependencyGroups);
+		}
+
+		void ShowDependencies (IEnumerable<PackageDependencyGroup> dependencyGroups)
+		{
+			packageDependenciesVBox.Clear ();
+
 			if (!dependencyGroups.Any ()) {
 				AddNoDependenciesLabel ();
 				return;
@@ -299,6 +362,29 @@ namespace MonoDevelop.NuGetPackageExplorer
 			foreach (FrameworkSpecificGroup frameworkSpecificGroup in referenceGroups) {
 				ShowFrameworkSpecificGroup (frameworkSpecificGroup, packageReferencesVBox);
 			}
+		}
+
+		protected override void Dispose (bool disposing)
+		{
+			cancelDownloadButton.Clicked -= CancelDownloadButtonClicked;
+
+			base.Dispose (disposing);
+		}
+
+		void CancelDownloadButtonClicked (object sender, EventArgs e)
+		{
+			OnCancelDownload ();
+		}
+
+		public bool IsDownloading {
+			get { return downloadingHBox.Visible; }
+			set { downloadingHBox.Visible = value; }
+		}
+
+		public void ShowError (string message)
+		{
+			errorLabel.Text = message;
+			errorHBox.Visible = true;
 		}
 	}
 }

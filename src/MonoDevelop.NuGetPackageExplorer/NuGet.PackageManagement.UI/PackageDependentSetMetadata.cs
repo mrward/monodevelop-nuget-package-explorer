@@ -12,6 +12,7 @@ namespace NuGet.PackageManagement.UI
 	{
 		public PackageDependencySetMetadata(PackageDependencyGroup dependencyGroup)
 		{
+			DependencyGroup = dependencyGroup;
 			TargetFramework = dependencyGroup.TargetFramework;
 			Dependencies = dependencyGroup.Packages
 				.Select(d => new PackageDependencyMetadata(d))
@@ -21,5 +22,6 @@ namespace NuGet.PackageManagement.UI
 
 		public NuGetFramework TargetFramework { get; private set; }
 		public IReadOnlyCollection<PackageDependencyMetadata> Dependencies { get; private set; }
+		internal PackageDependencyGroup DependencyGroup { get; private set; }
 	}
 }

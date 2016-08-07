@@ -74,7 +74,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 		bool IsInternalPackageFile (string name)
 		{
 			return name.EndsWith (".nuspec", StringComparison.OrdinalIgnoreCase) ||
-				name.Equals ("[Content_Types].xml", StringComparison.OrdinalIgnoreCase);
+				name.Equals ("[Content_Types].xml", StringComparison.OrdinalIgnoreCase) ||
+				name.EndsWith (".sha512");
 		}
 
 		bool HasFolder ()

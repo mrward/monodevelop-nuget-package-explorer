@@ -26,28 +26,46 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.PackageManagement;
+using MonoDevelop.Projects;
+using NuGet.Protocol.Core.Types;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class OpenNuGetPackageFromSourceHandler : CommandHandler
 	{
+		DotNetProject project;
+
+		protected override void Update (CommandInfo info)
+		{
+			project = IdeApp.ProjectOperations.CurrentSelectedProject as DotNetProject;
+			info.Enabled = project != null;
+		}
+
 		protected override void Run ()
 		{
 			try {
 				string initialSearch = null;
 				bool configurePackageSources = false;
+				IEnumerable<PackageSearchResultViewModel> packages = null;
+				IEnumerable<SourceRepository> repositories = null;
 				do {
 					using (AddPackagesDialog dialog = CreateDialog (initialSearch)) {
 						dialog.ShowWithParent ();
 						configurePackageSources = dialog.ShowPreferencesForPackageSources;
 						initialSearch = dialog.SearchText;
+						packages = dialog.SelectedPackages;
+						repositories = dialog.GetSourceRepositories ();
 					}
 					if (configurePackageSources) {
 						ShowPreferencesForPackageSources ();
+					} else {
+						OpenPackages (packages, repositories);
 					}
 				} while (configurePackageSources);
 
@@ -67,6 +85,21 @@ namespace MonoDevelop.NuGetPackageExplorer
 		void ShowPreferencesForPackageSources ()
 		{
 			IdeApp.Workbench.ShowGlobalPreferencesDialog (null, "PackageSources");
+		}
+
+		void OpenPackages (IEnumerable<PackageSearchResultViewModel> packages, IEnumerable<SourceRepository> repositories)
+		{
+			if (!packages.Any ())
+				return;
+
+			var settings = SettingsLoader.LoadDefaultSettings (project.ParentSolution.BaseDirectory);
+
+			foreach (PackageSearchResultViewModel package in packages) {
+				package.Parent = null;
+				var view = new NuGetPackageView ();
+				view.DownloadPackage (package, repositories, settings);
+				IdeApp.Workbench.OpenDocument (view, true);
+			}
 		}
 	}
 }

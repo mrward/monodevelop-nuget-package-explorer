@@ -27,11 +27,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Mono.Unix;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Projects;
+using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Xwt;
 using Xwt.Drawing;
@@ -62,6 +62,7 @@ namespace MonoDevelop.PackageManagement
 		int packageVersionsAddedCount;
 		IDisposable populatePackageVersionsTimer;
 		const int MaxVersionsToPopulate = 100;
+		List<PackageSearchResultViewModel> selectedPackages = new List<PackageSearchResultViewModel> ();
 
 		public AddPackagesDialog (AllPackagesViewModel viewModel, string initialSearch = null)
 		{
@@ -86,6 +87,18 @@ namespace MonoDevelop.PackageManagement
 		}
 
 		public bool ShowPreferencesForPackageSources { get; private set; }
+
+		public IEnumerable<PackageSearchResultViewModel> SelectedPackages {
+			get { return selectedPackages; }
+		}
+
+		public IEnumerable<SourceRepository> GetSourceRepositories ()
+		{
+			if (ShowPreferencesForPackageSources)
+				return Enumerable.Empty <SourceRepository> ();
+
+			return viewModel.SelectedPackageSource.GetSourceRepositories ();
+		}
 
 		protected override void Dispose (bool disposing)
 		{
@@ -481,6 +494,7 @@ namespace MonoDevelop.PackageManagement
 		void AddPackagesButtonClicked (object sender, EventArgs e)
 		{
 			try {
+				selectedPackages = GetSelectedPackageViewModels ();
 				Close ();
 			} catch (Exception ex) {
 				LoggingService.LogError ("Adding packages failed.", ex);
@@ -533,12 +547,7 @@ namespace MonoDevelop.PackageManagement
 
 		void PackagesListRowActivated (object sender, ListViewRowEventArgs e)
 		{
-			if (PackagesCheckedCount > 0) {
-				AddPackagesButtonClicked (sender, e);
-			} else {
-			//	PackageSearchResultViewModel packageViewModel = packageStore.GetValue (e.RowIndex, packageViewModelField);
-			//	InstallPackage (packageViewModel);
-			}
+			AddPackagesButtonClicked (sender, e);
 		}
 
 		void PackageSearchEntryActivated (object sender, EventArgs e)
@@ -546,13 +555,7 @@ namespace MonoDevelop.PackageManagement
 			if (loadingMessageVisible)
 				return;
 
-			// TODO:
-			if (PackagesCheckedCount > 0) {
-				AddPackagesButtonClicked (sender, e);
-			} else {
-				PackageSearchResultViewModel selectedPackageViewModel = GetSelectedPackageViewModel ();
-				//InstallPackage (selectedPackageViewModel);
-			}
+			AddPackagesButtonClicked (sender, e);
 		}
 
 		void PackagesListViewScrollValueChanged (object sender, EventArgs e)

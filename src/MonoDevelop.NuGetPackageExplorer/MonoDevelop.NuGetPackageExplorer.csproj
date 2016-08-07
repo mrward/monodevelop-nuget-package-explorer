@@ -27,6 +27,7 @@
         </Command>
       </CustomCommands>
     </CustomCommands>
+    <NoWarn>4014</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
