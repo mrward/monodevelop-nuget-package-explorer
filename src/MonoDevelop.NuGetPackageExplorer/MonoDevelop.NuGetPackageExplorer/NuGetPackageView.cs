@@ -123,6 +123,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			var topScrollView = new ScrollView ();
 			packageMetadataView = new NuGetPackageMetadataView ();
 			packageMetadataView.OnCancelDownload = OnCancelDownload;
+			packageMetadataView.OnOpenPackageDependency = OnOpenPackageDependency;
 			topScrollView.Content = packageMetadataView;
 			pane.Panel1.Content = topScrollView;
 
@@ -179,6 +180,16 @@ namespace MonoDevelop.NuGetPackageExplorer
 				}
 			} catch (Exception ex) {
 				LoggingService.LogError ("Cancel download failed.", ex);
+			}
+		}
+
+		void OnOpenPackageDependency (PackageDependency dependency)
+		{
+			try {
+				var handler = new OpenNuGetPackageFromSourceHandler ();
+				handler.Run (dependency);
+			} catch (Exception ex) {
+				LoggingService.LogError ("Unable to open package dependency.", ex);
 			}
 		}
 	}

@@ -33,16 +33,27 @@ using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.PackageManagement;
 using NuGet.Configuration;
+using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class OpenNuGetPackageFromSourceHandler : CommandHandler
 	{
+		public void Run (PackageDependency dependency)
+		{
+			string search = string.Format ("packageid:{0}", dependency.Id);
+			Run (search);
+		}
+
 		protected override void Run ()
 		{
+			Run (initialSearch: null);
+		}
+
+		void Run (string initialSearch)
+		{
 			try {
-				string initialSearch = null;
 				bool configurePackageSources = false;
 				IEnumerable<PackageSearchResultViewModel> packages = null;
 				IEnumerable<SourceRepository> repositories = null;

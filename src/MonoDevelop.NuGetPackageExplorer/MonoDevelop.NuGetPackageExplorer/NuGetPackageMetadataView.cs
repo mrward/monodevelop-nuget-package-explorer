@@ -68,6 +68,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		VBox packageFrameworkReferencesVBox;
 		HBox packageReferencesLabelHBox;
 		VBox packageReferencesVBox;
+		List<LinkLabel> dependencyLabels = new List<LinkLabel> ();
 
 		public NuGetPackageMetadataView ()
 		{
@@ -75,6 +76,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		}
 
 		public Action OnCancelDownload = () => { };
+		public Action<PackageDependency> OnOpenPackageDependency = dependency => { };
 
 		void Build ()
 		{
@@ -314,7 +316,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 			foreach (PackageDependency package in dependencyGroup.Packages) {
 				string text = String.Format("{0} {1}", package.Id, package.VersionRange.ToString ("P", formatter));
-				var label = new Label (text);
+				var label = new LinkLabel (text);
+				label.Tag = package;
+				label.NavigateToUrl += OpenDependencyPackage;
+				label.TooltipText = GettextCatalog.GetString ("Open this package from an online package source");
 				label.MarginLeft = leftMargin;
 				packageDependenciesVBox.PackStart (label);
 			}
@@ -368,6 +373,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			cancelDownloadButton.Clicked -= CancelDownloadButtonClicked;
 
+			foreach (LinkLabel label in dependencyLabels) {
+				label.NavigateToUrl -= OpenDependencyPackage;
+			}
+
 			base.Dispose (disposing);
 		}
 
@@ -385,6 +394,17 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			errorLabel.Text = message;
 			errorHBox.Visible = true;
+		}
+
+		void OpenDependencyPackage (object sender, NavigateToUrlEventArgs e)
+		{
+			try {
+				var label = (LinkLabel)sender;
+				var dependency = (PackageDependency)label.Tag;
+				OnOpenPackageDependency (dependency);
+			} finally {
+				e.SetHandled ();
+			}
 		}
 	}
 }
