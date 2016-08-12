@@ -27,7 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mono.Unix;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Projects;
@@ -36,6 +35,7 @@ using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Xwt;
 using Xwt.Drawing;
+using Catalog = MonoDevelop.Core.GettextCatalog;
 using PropertyChangedEventArgs = System.ComponentModel.PropertyChangedEventArgs;
 
 namespace MonoDevelop.PackageManagement

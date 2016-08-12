@@ -24,9 +24,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
+using Catalog = MonoDevelop.Core.GettextCatalog;
 using ExtendedTitleBarDialog = MonoDevelop.Components.ExtendedTitleBarDialog;
-using Mono.Unix;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using Xwt;
