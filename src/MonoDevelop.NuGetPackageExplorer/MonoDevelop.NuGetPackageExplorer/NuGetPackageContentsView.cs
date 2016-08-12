@@ -183,7 +183,11 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			base.OnButtonPressed (args);
 
-			if (args.Button != PointerButton.Right) {
+			if (Platform.IsMac &&
+				args.Button == PointerButton.Left &&
+				Keyboard.CurrentModifiers == ModifierKeys.Control) {
+				// Allow control + left click on the Mac
+			} else if (args.Button != PointerButton.Right) {
 				return;
 			}
 
