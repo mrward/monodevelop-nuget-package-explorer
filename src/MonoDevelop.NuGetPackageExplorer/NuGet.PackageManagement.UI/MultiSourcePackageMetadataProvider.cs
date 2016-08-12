@@ -57,7 +57,7 @@ namespace NuGet.PackageManagement.UI
 				tasks.Add(_localRepository.GetPackageMetadataFromLocalSourceAsync(identity, cancellationToken));
 			}
 
-			var ignored = tasks
+			tasks
 				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
 				.ToArray();
 
@@ -79,7 +79,7 @@ namespace NuGet.PackageManagement.UI
 				.Select(r => r.GetLatestPackageMetadataAsync(identity.Id, includePrerelease, cancellationToken))
 				.ToArray();
 
-			var ignored = tasks
+			tasks
 				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
 				.ToArray();
 
@@ -100,7 +100,7 @@ namespace NuGet.PackageManagement.UI
 				.Select(r => r.GetPackageMetadataListAsync(packageId, includePrerelease, includeUnlisted, cancellationToken))
 				.ToArray();
 
-			var ignored = tasks
+			tasks
 				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
 				.ToArray();
 
@@ -153,7 +153,7 @@ namespace NuGet.PackageManagement.UI
 				tasks.Add(_localRepository.GetPackageMetadataFromLocalSourceAsync(identity, cancellationToken));
 			}
 
-			var ignored = tasks
+			tasks
 				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
 				.ToArray();
 

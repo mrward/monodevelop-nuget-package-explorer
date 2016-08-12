@@ -56,7 +56,6 @@ namespace MonoDevelop.PackageManagement
 		IMonoDevelopSolutionManager solutionManager;
 		NuGetProject nugetProject;
 		DotNetProject dotNetProject;
-		INuGetProjectContext projectContext;
 		List<PackageReference> packageReferences = new List<PackageReference> ();
 		AggregatePackageSourceErrorMessage aggregateErrorMessage;
 		NuGetPackageManager packageManager;
@@ -74,21 +73,9 @@ namespace MonoDevelop.PackageManagement
 		public AllPackagesViewModel (
 			IMonoDevelopSolutionManager solutionManager,
 			DotNetProject dotNetProject)
-			: this (
-				solutionManager,
-				dotNetProject,
-				new NuGetProjectContext ())
-		{
-		}
-
-		public AllPackagesViewModel (
-			IMonoDevelopSolutionManager solutionManager,
-			DotNetProject dotNetProject,
-			INuGetProjectContext projectContext)
 		{
 			this.solutionManager = solutionManager;
 			this.dotNetProject = dotNetProject;
-			this.projectContext = projectContext;
 			PackageViewModels = new ObservableCollection<PackageSearchResultViewModel> ();
 			CheckedPackageViewModels = new ObservableCollection<PackageSearchResultViewModel> ();
 			ErrorMessage = String.Empty;

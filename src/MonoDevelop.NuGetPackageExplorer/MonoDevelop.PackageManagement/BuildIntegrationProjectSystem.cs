@@ -44,7 +44,6 @@ namespace MonoDevelop.PackageManagement
 	internal class BuildIntegratedProjectSystem : BuildIntegratedNuGetProject
 	{
 		DotNetProject dotNetProject;
-		VersionFolderPathResolver packagePathResolver;
 
 		public BuildIntegratedProjectSystem (
 			string jsonConfigPath,
@@ -56,9 +55,6 @@ namespace MonoDevelop.PackageManagement
 			: base (jsonConfigPath, msbuildProjectFilePath, msbuildProjectSystem)
 		{
 			this.dotNetProject = dotNetProject;
-
-			string path = SettingsUtility.GetGlobalPackagesFolder (settings);
-			packagePathResolver = new VersionFolderPathResolver (path, normalizePackageId: false);
 		}
 
 		public override Task<bool> ExecuteInitScriptAsync (PackageIdentity identity, string packageInstallPath, INuGetProjectContext projectContext, bool throwOnFailure)

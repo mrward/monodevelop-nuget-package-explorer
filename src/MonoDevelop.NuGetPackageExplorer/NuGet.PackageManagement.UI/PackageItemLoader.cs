@@ -239,7 +239,7 @@ namespace NuGet.PackageManagement.UI
 			return await _packageFeed.SearchAsync(_searchText, SearchFilter, cancellationToken);
 		}
 
-		#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+		#pragma warning disable 1998 // Async method lacks 'await' operators and will run synchronously
 		private async Task UpdateStateAndReportAsync(SearchResult<IPackageSearchMetadata> searchResult, IProgress<IItemLoaderState> progress)
 		{
 			// cache installed packages here for future use
@@ -249,7 +249,7 @@ namespace NuGet.PackageManagement.UI
 			_state = state;
 			progress?.Report(state);
 		}
-		#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+		#pragma warning restore 1998 // Async method lacks 'await' operators and will run synchronously
 
 		public void Reset()
 		{

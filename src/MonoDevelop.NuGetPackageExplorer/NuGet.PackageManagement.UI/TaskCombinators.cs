@@ -57,7 +57,7 @@ namespace NuGet.PackageManagement.UI
 					s =>
 					{
 						var valueTask = valueSelector(s, cancellationToken);
-						var ignored = valueTask.ContinueWith(
+						valueTask.ContinueWith(
 							observeErrorAction, 
 							s, 
 							cancellationToken, 
