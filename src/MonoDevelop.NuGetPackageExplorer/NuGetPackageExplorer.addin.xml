@@ -2,6 +2,8 @@
 	<Runtime>
 		<Import assembly="MonoDevelop.NuGetPackageExplorer.dll" />
 		<Import assembly="NuGet.exe" />
+		<Import file="ICSharpCode.SharpZipLib.dll" />
+		<Import file="Lucene.Net.dll" />
 	</Runtime>
 
 	<Extension path="/MonoDevelop/Ide/DisplayBindings">
