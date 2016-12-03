@@ -35,7 +35,7 @@ using Mono.Addins;
 [assembly:AddinName ("NuGet Package Explorer")]
 [assembly:AddinDescription ("Open and view NuGet packages (.nupkg)")]
 
-[assembly:AddinDependency ("Core", "6.0")]
-[assembly:AddinDependency ("Ide", "6.0")]
-[assembly:AddinDependency ("PackageManagement", "6.0")]
+[assembly:AddinDependency ("Core", "7.0")]
+[assembly:AddinDependency ("Ide", "7.0")]
+[assembly:AddinDependency ("PackageManagement", "7.0")]
 
