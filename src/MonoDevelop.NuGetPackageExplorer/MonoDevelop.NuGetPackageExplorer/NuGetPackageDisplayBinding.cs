@@ -46,6 +46,9 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 		public bool CanHandle (FilePath fileName, string mimeType, Project ownerProject)
 		{
+			if (fileName.IsNull)
+				return false;
+
 			return fileName.HasExtension (".nupkg");
 		}
 
