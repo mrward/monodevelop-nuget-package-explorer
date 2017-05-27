@@ -69,7 +69,14 @@ namespace MonoDevelop.NuGetPackageExplorer
 			if (string.IsNullOrEmpty (version) || string.IsNullOrEmpty (Id))
 				return;
 
-			Version = NuGetVersion.Parse (version);
+			VersionRange versionRange = null;
+			if (!VersionRange.TryParse (version, out versionRange))
+				return;
+
+			if (versionRange.IsFloating)
+				Version = new NuGetVersion (versionRange.MinVersion.Version);
+			else
+				Version = versionRange.MinVersion;
 
 			Identity = new PackageIdentity (Id, Version);
 		}

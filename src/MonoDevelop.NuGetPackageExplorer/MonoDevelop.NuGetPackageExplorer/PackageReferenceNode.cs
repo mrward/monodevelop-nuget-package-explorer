@@ -71,7 +71,15 @@ namespace MonoDevelop.NuGetPackageExplorer
 			if (string.IsNullOrEmpty (version) || string.IsNullOrEmpty (Id))
 				return;
 
-			Version = NuGetVersion.Parse (version);
+			VersionRange versionRange = null;
+			if (!VersionRange.TryParse (version, out versionRange))
+				return;
+
+			// Just use MinRange here which is different to how the PackageDependencyNode
+			// works. The version property here will return 10.0-- for wild cards unlike
+			// PackageDependencyNode which returns the correct wildcard. So just use the
+			// MinVersion which will fail to resolve a NuGet package and open the dialog.
+			Version = versionRange.MinVersion;
 
 			Identity = new PackageIdentity (Id, Version);
 		}
