@@ -56,7 +56,9 @@
 	</Extension>
 
 	<Extension path="/MonoDevelop/Ide/ContextMenu/ProjectPad">
-		<Condition id="ItemType" value="MonoDevelop.PackageManagement.NodeBuilders.ProjectPackagesFolderNode">
+		<Condition
+			id="ItemType"
+			value="MonoDevelop.PackageManagement.NodeBuilders.ProjectPackagesFolderNode|MonoDevelop.DotNetCore.NodeBuilders.DependenciesNode|MonoDevelop.DotNetCore.NodeBuilders.PackageDependenciesNode">
 			<SeparatorItem id="OpenNuGetPackageFromSourceSeparator" />
 			<CommandItem
 				id="MonoDevelop.PackageExplorer.Commands.OpenPackageFromSource"
