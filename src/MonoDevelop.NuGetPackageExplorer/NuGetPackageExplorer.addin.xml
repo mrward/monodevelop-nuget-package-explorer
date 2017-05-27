@@ -55,6 +55,11 @@
 		<CommandItem id="MonoDevelop.PackageExplorer.Commands.OpenPackage" />
 	</Extension>
 
+	<Extension path="/MonoDevelop/DotNetCore/ContextMenu/ProjectPad/PackageDependency">
+		<SeparatorItem id="OpenNuGetPackageSeparator" />
+		<CommandItem id="MonoDevelop.PackageExplorer.Commands.OpenPackage" />
+	</Extension>
+
 	<Extension path="/MonoDevelop/Ide/ContextMenu/ProjectPad">
 		<Condition
 			id="ItemType"

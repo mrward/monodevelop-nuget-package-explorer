@@ -38,4 +38,5 @@ using Mono.Addins;
 [assembly:AddinDependency ("Core", "7.0")]
 [assembly:AddinDependency ("Ide", "7.0")]
 [assembly:AddinDependency ("PackageManagement", "7.0")]
+[assembly:AddinDependency ("DotNetCore", "7.0")]
 

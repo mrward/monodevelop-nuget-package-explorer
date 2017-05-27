@@ -138,6 +138,7 @@
     <Compile Include="MonoDevelop.PackageManagement\PackageSearchResultViewModelComparer.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\OpenNuGetPackageFromSourceHandler.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\DummyDotNetProject.cs" />
+    <Compile Include="MonoDevelop.NuGetPackageExplorer\PackageDependencyNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml" />

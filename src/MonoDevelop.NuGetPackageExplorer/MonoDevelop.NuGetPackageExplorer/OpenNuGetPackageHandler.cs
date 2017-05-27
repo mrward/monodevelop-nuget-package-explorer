@@ -30,22 +30,28 @@ using MonoDevelop.Components.Commands;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Projects;
+using NuGet.Packaging.Core;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class OpenNuGetPackageHandler : CommandHandler
 	{
-		PackageReferenceNode packageReferenceNode;
+		PackageIdentity package;
 		Project project;
 
 		protected override void Update (CommandInfo info)
 		{
 			project = IdeApp.ProjectOperations.CurrentSelectedProject;
 
-			packageReferenceNode = PackageReferenceNode.GetSelectedNode ();
+			var packageReferenceNode = PackageReferenceNode.GetSelectedNode ();
+			package = packageReferenceNode?.Identity;
+			if (package == null) {
+				var packageDependencyNode = PackageDependencyNode.GetSelectedNode ();
+				package = packageDependencyNode?.Identity;
+			}
+
 			info.Enabled = project != null &&
-				packageReferenceNode != null &&
-				packageReferenceNode.IsRestored;
+				package != null;
 		}
 
 		protected override void Run ()
@@ -62,13 +68,13 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			string path = NuGetPackageLocator.GetNuGetPackagePath (
 				project,
-				packageReferenceNode.Identity);
+				package);
 
 			if (path != null) {
 				IdeApp.Workbench.OpenDocument (path, null, true);
 			} else {
 				var handler = new OpenNuGetPackageFromSourceHandler ();
-				handler.Run (packageReferenceNode.Identity);
+				handler.Run (package);
 			}
 		}
 	}
