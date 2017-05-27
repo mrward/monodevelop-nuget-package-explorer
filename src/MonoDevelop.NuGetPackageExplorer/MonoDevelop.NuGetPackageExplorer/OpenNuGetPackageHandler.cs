@@ -64,7 +64,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 				project,
 				packageReferenceNode.Identity);
 
-			IdeApp.Workbench.OpenDocument (path, null, true);
+			if (path != null) {
+				IdeApp.Workbench.OpenDocument (path, null, true);
+			} else {
+				var handler = new OpenNuGetPackageFromSourceHandler ();
+				handler.Run (packageReferenceNode.Identity);
+			}
 		}
 	}
 }

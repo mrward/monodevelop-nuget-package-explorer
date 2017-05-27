@@ -38,22 +38,30 @@ namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class NuGetPackageLocator
 	{
+		/// <summary>
+		/// Tries to find the package in the global packages directory, then tries the 
+		/// solution's packages directory. If the NuGet package cannot be found then this
+		/// method returns null.
+		/// </summary>
 		public static string GetNuGetPackagePath (Project project, PackageIdentity packageIdentity)
 		{
 			var settings = Settings.LoadDefaultSettings (project.ParentSolution.BaseDirectory, null, null);
 
-			string projectJsonPath = ProjectJsonPathUtilities.GetProjectConfigPath (project.BaseDirectory, project.Name);
-			if (File.Exists (projectJsonPath)) {
-				string globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder (settings); 
-				var packagePathResolver = new VersionFolderPathResolver (globalPackagesFolder, normalizePackageId: false);
-				return packagePathResolver.GetPackageFilePath (packageIdentity.Id, packageIdentity.Version);
-			}
+			string globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder (settings);
+			var packagePathResolver = new VersionFolderPathResolver (globalPackagesFolder, normalizePackageId: false);
+			string packagePath = packagePathResolver.GetPackageFilePath (packageIdentity.Id, packageIdentity.Version);
+			if (File.Exists (packagePath))
+				return packagePath;
 
 			string path = PackagesFolderPathUtility.GetPackagesFolderPath (project.ParentSolution.BaseDirectory, settings);
 			string fullPath = new FilePath (path).FullPath;
 
 			var folder = new FolderNuGetProject (fullPath);
-			return folder.GetInstalledPackageFilePath (packageIdentity);
+			packagePath = folder.GetInstalledPackageFilePath (packageIdentity);
+			if (File.Exists (packagePath))
+				return packagePath;
+
+			return null;
 		}
 	}
 }

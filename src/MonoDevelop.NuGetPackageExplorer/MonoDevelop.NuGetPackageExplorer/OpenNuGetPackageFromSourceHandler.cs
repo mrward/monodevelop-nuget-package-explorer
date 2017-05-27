@@ -42,7 +42,18 @@ namespace MonoDevelop.NuGetPackageExplorer
 	{
 		public void Run (PackageDependency dependency)
 		{
-			string search = string.Format ("packageid:{0}", dependency.Id);
+			string search = GetPackageIdSearch (dependency.Id);
+			Run (search);
+		}
+
+		static string GetPackageIdSearch (string packageId)
+		{
+			return string.Format ("packageid:{0}", packageId);
+		}
+
+		public void Run (PackageIdentity package)
+		{
+			string search = GetPackageIdSearch (package.Id);
 			Run (search);
 		}
 
