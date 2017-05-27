@@ -61,10 +61,13 @@ namespace MonoDevelop.NuGetPackageExplorer
 			var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 			Type type = dataItem.GetType ();
 			var property = type.GetProperty ("Name", bindingFlags);
-			Id = (string)property.GetValue (dataItem);
+			Id = (string)property?.GetValue (dataItem);
 
 			var field = type.GetField ("version", bindingFlags | BindingFlags.NonPublic);
-			string version = field.GetValue (dataItem).ToString ();
+			string version = field?.GetValue (dataItem)?.ToString ();
+
+			if (string.IsNullOrEmpty (version) || string.IsNullOrEmpty (Id))
+				return;
 
 			Version = NuGetVersion.Parse (version);
 

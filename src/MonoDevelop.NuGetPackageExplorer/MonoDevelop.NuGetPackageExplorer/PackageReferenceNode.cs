@@ -41,7 +41,6 @@ namespace MonoDevelop.NuGetPackageExplorer
 			Init (dataItem);
 		}
 
-		public bool IsRestored { get; private set; }
 		public string Id { get; private set; }
 		public NuGetVersion Version { get; private set; }
 		public PackageIdentity Identity { get; private set; }
@@ -62,14 +61,15 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 			Type type = dataItem.GetType ();
-			var property = type.GetProperty ("Installed", bindingFlags);
-			IsRestored = (bool)property.GetValue (dataItem);
 
-			property = type.GetProperty ("Id", bindingFlags);
-			Id = (string)property.GetValue (dataItem);
+			var property = type.GetProperty ("Id", bindingFlags);
+			Id = (string)property?.GetValue (dataItem);
 
 			property = type.GetProperty ("Version", bindingFlags);
-			string version = property.GetValue (dataItem).ToString ();
+			string version = property?.GetValue (dataItem)?.ToString ();
+
+			if (string.IsNullOrEmpty (version) || string.IsNullOrEmpty (Id))
+				return;
 
 			Version = NuGetVersion.Parse (version);
 
