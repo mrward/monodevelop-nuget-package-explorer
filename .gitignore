@@ -3,3 +3,7 @@ obj
 *.userprefs
 *.DS_Store
 packages
+.vs/
+*.user
+*.mpack
+lib
