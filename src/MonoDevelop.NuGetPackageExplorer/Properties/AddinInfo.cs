@@ -33,7 +33,7 @@ using Mono.Addins;
                  Category = "IDE extensions")]
 
 [assembly:AddinName ("NuGet Package Explorer")]
-[assembly:AddinDescription ("Open and view NuGet packages (.nupkg)")]
+[assembly:AddinDescription ("Open and view NuGet packages (.nupkg). Adds support for viewing SemVer 2.0 NuGet packages.")]
 
 [assembly:AddinDependency ("Core", "7.0")]
 [assembly:AddinDependency ("Ide", "7.0")]

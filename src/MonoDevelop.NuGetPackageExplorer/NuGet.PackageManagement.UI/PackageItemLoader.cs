@@ -20,14 +20,12 @@ namespace NuGet.PackageManagement.UI
 		private readonly IPackageFeed _packageFeed;
 		//private PackageCollection _installedPackages;
 
-		private SearchFilter SearchFilter => new SearchFilter
-		{
-			IncludePrerelease = _includePrerelease,
-			SupportedFrameworks = _context.GetSupportedFrameworks()
+		private SearchFilter SearchFilter => new SearchFilter (includePrerelease: _includePrerelease) {
+			SupportedFrameworks = _context.GetSupportedFrameworks ()
 		};
 
 		// Never null
-		private PackageFeedSearchState _state = new PackageFeedSearchState();
+		private PackageFeedSearchState _state = new PackageFeedSearchState ();
 
 		public IItemLoaderState State => _state;
 
@@ -37,32 +35,28 @@ namespace NuGet.PackageManagement.UI
 		{
 			private readonly SearchResult<IPackageSearchMetadata> _results;
 
-			public PackageFeedSearchState()
+			public PackageFeedSearchState ()
 			{
 			}
 
-			public PackageFeedSearchState(SearchResult<IPackageSearchMetadata> results)
+			public PackageFeedSearchState (SearchResult<IPackageSearchMetadata> results)
 			{
-				if (results == null)
-				{
-					throw new ArgumentNullException(nameof(results));
+				if (results == null) {
+					throw new ArgumentNullException (nameof (results));
 				}
 				_results = results;
 			}
 
 			public SearchResult<IPackageSearchMetadata> Results => _results;
 
-			public LoadingStatus LoadingStatus
-			{
-				get
-				{
-					if (_results == null)
-					{
+			public LoadingStatus LoadingStatus {
+				get {
+					if (_results == null) {
 						// initial status when no load called before
 						return LoadingStatus.Unknown;
 					}
 
-					return AggregateLoadingStatus(SourceLoadingStatus?.Values);
+					return AggregateLoadingStatus (SourceLoadingStatus?.Values);
 				}
 			}
 
@@ -72,48 +66,40 @@ namespace NuGet.PackageManagement.UI
 
 			public IDictionary<string, LoadingStatus> SourceLoadingStatus => _results?.SourceSearchStatus;
 
-			private static LoadingStatus AggregateLoadingStatus(IEnumerable<LoadingStatus> statuses)
+			private static LoadingStatus AggregateLoadingStatus (IEnumerable<LoadingStatus> statuses)
 			{
-				var count = statuses?.Count() ?? 0;
+				var count = statuses?.Count () ?? 0;
 
-				if (count == 0)
-				{
+				if (count == 0) {
 					return LoadingStatus.Loading;
 				}
 
-				var first = statuses.First();
-				if (count == 1 || statuses.All(x => x == first))
-				{
+				var first = statuses.First ();
+				if (count == 1 || statuses.All (x => x == first)) {
 					return first;
 				}
 
-				if (statuses.Contains(LoadingStatus.Loading))
-				{
+				if (statuses.Contains (LoadingStatus.Loading)) {
 					return LoadingStatus.Loading;
 				}
 
-				if (statuses.Contains(LoadingStatus.ErrorOccurred))
-				{
+				if (statuses.Contains (LoadingStatus.ErrorOccurred)) {
 					return LoadingStatus.ErrorOccurred;
 				}
 
-				if (statuses.Contains(LoadingStatus.Cancelled))
-				{
+				if (statuses.Contains (LoadingStatus.Cancelled)) {
 					return LoadingStatus.Cancelled;
 				}
 
-				if (statuses.Contains(LoadingStatus.Ready))
-				{
+				if (statuses.Contains (LoadingStatus.Ready)) {
 					return LoadingStatus.Ready;
 				}
 
-				if (statuses.Contains(LoadingStatus.NoMoreItems))
-				{
+				if (statuses.Contains (LoadingStatus.NoMoreItems)) {
 					return LoadingStatus.NoMoreItems;
 				}
 
-				if (statuses.Contains(LoadingStatus.NoItemsFound))
-				{
+				if (statuses.Contains (LoadingStatus.NoItemsFound)) {
 					return LoadingStatus.NoItemsFound;
 				}
 
@@ -121,21 +107,19 @@ namespace NuGet.PackageManagement.UI
 			}
 		}
 
-		public PackageItemLoader(
+		public PackageItemLoader (
 			PackageLoadContext context,
 			IPackageFeed packageFeed,
 			string searchText = null,
 			bool includePrerelease = true)
 		{
-			if (context == null)
-			{
-				throw new ArgumentNullException(nameof(context));
+			if (context == null) {
+				throw new ArgumentNullException (nameof (context));
 			}
 			_context = context;
 
-			if (packageFeed == null)
-			{
-				throw new ArgumentNullException(nameof(packageFeed));
+			if (packageFeed == null) {
+				throw new ArgumentNullException (nameof (packageFeed));
 			}
 			_packageFeed = packageFeed;
 
@@ -143,159 +127,150 @@ namespace NuGet.PackageManagement.UI
 			_includePrerelease = includePrerelease;
 		}
 
-		public async Task<int> GetTotalCountAsync(int maxCount, CancellationToken cancellationToken)
+		public async Task<int> GetTotalCountAsync (int maxCount, CancellationToken cancellationToken)
 		{
 			// Go off the UI thread to perform non-UI operations
 			//await TaskScheduler.Default;
 
 			int totalCount = 0;
 			ContinuationToken nextToken = null;
-			do
-			{
-				var searchResult = await SearchAsync(nextToken, cancellationToken);
-				while (searchResult.RefreshToken != null)
-				{
-					searchResult = await _packageFeed.RefreshSearchAsync(searchResult.RefreshToken, cancellationToken);
+			do {
+				var searchResult = await SearchAsync (nextToken, cancellationToken);
+				while (searchResult.RefreshToken != null) {
+					searchResult = await _packageFeed.RefreshSearchAsync (searchResult.RefreshToken, cancellationToken);
 				}
-				totalCount += searchResult.Items?.Count() ?? 0;
+				totalCount += searchResult.Items?.Count () ?? 0;
 				nextToken = searchResult.NextToken;
 			} while (nextToken != null && totalCount <= maxCount);
 
 			return totalCount;
 		}
 
-		public async Task<IReadOnlyList<IPackageSearchMetadata>> GetAllPackagesAsync(CancellationToken cancellationToken)
+		public async Task<IReadOnlyList<IPackageSearchMetadata>> GetAllPackagesAsync (CancellationToken cancellationToken)
 		{
 			// Go off the UI thread to perform non-UI operations
 			//await TaskScheduler.Default;
 
-			var packages = new List<IPackageSearchMetadata>();
+			var packages = new List<IPackageSearchMetadata> ();
 			ContinuationToken nextToken = null;
-			do
-			{
-				var searchResult = await SearchAsync(nextToken, cancellationToken);
-				while (searchResult.RefreshToken != null)
-				{
-					searchResult = await _packageFeed.RefreshSearchAsync(searchResult.RefreshToken, cancellationToken);
+			do {
+				var searchResult = await SearchAsync (nextToken, cancellationToken);
+				while (searchResult.RefreshToken != null) {
+					searchResult = await _packageFeed.RefreshSearchAsync (searchResult.RefreshToken, cancellationToken);
 				}
 
 				nextToken = searchResult.NextToken;
 
-				packages.AddRange(searchResult.Items);
+				packages.AddRange (searchResult.Items);
 
 			} while (nextToken != null);
 
 			return packages;
 		}
 
-		public async Task LoadNextAsync(IProgress<IItemLoaderState> progress, CancellationToken cancellationToken)
+		public async Task LoadNextAsync (IProgress<IItemLoaderState> progress, CancellationToken cancellationToken)
 		{
-			cancellationToken.ThrowIfCancellationRequested();
+			cancellationToken.ThrowIfCancellationRequested ();
 
-			NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadBegin);
+			NuGetEventTrigger.Instance.TriggerEvent (NuGetEvent.PackageLoadBegin);
 
 			var nextToken = _state.Results?.NextToken;
-			var cleanState = SearchResult.Empty<IPackageSearchMetadata>();
+			var cleanState = SearchResult.Empty<IPackageSearchMetadata> ();
 			cleanState.NextToken = nextToken;
-			await UpdateStateAndReportAsync(cleanState, progress);
+			await UpdateStateAndReportAsync (cleanState, progress);
 
-			var searchResult = await SearchAsync(nextToken, cancellationToken);
+			var searchResult = await SearchAsync (nextToken, cancellationToken);
 
-			cancellationToken.ThrowIfCancellationRequested();
+			cancellationToken.ThrowIfCancellationRequested ();
 
-			await UpdateStateAndReportAsync(searchResult, progress);
+			await UpdateStateAndReportAsync (searchResult, progress);
 
-			NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadEnd);
+			NuGetEventTrigger.Instance.TriggerEvent (NuGetEvent.PackageLoadEnd);
 		}
 
-		public async Task UpdateStateAsync(IProgress<IItemLoaderState> progress, CancellationToken cancellationToken)
+		public async Task UpdateStateAsync (IProgress<IItemLoaderState> progress, CancellationToken cancellationToken)
 		{
-			cancellationToken.ThrowIfCancellationRequested();
+			cancellationToken.ThrowIfCancellationRequested ();
 
-			NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadBegin);
+			NuGetEventTrigger.Instance.TriggerEvent (NuGetEvent.PackageLoadBegin);
 
-			progress?.Report(_state);
+			progress?.Report (_state);
 
 			var refreshToken = _state.Results?.RefreshToken;
-			if (refreshToken != null)
-			{
-				var searchResult = await _packageFeed.RefreshSearchAsync(refreshToken, cancellationToken);
+			if (refreshToken != null) {
+				var searchResult = await _packageFeed.RefreshSearchAsync (refreshToken, cancellationToken);
 
-				cancellationToken.ThrowIfCancellationRequested();
+				cancellationToken.ThrowIfCancellationRequested ();
 
-				await UpdateStateAndReportAsync(searchResult, progress);
+				await UpdateStateAndReportAsync (searchResult, progress);
 			}
 
-			NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadEnd);
+			NuGetEventTrigger.Instance.TriggerEvent (NuGetEvent.PackageLoadEnd);
 		}
 
-		private async Task<SearchResult<IPackageSearchMetadata>> SearchAsync(ContinuationToken continuationToken, CancellationToken cancellationToken)
+		private async Task<SearchResult<IPackageSearchMetadata>> SearchAsync (ContinuationToken continuationToken, CancellationToken cancellationToken)
 		{
-			if (continuationToken != null)
-			{
-				return await _packageFeed.ContinueSearchAsync(continuationToken, cancellationToken);
+			if (continuationToken != null) {
+				return await _packageFeed.ContinueSearchAsync (continuationToken, cancellationToken);
 			}
 
-			return await _packageFeed.SearchAsync(_searchText, SearchFilter, cancellationToken);
+			return await _packageFeed.SearchAsync (_searchText, SearchFilter, cancellationToken);
 		}
 
-		#pragma warning disable 1998 // Async method lacks 'await' operators and will run synchronously
-		private async Task UpdateStateAndReportAsync(SearchResult<IPackageSearchMetadata> searchResult, IProgress<IItemLoaderState> progress)
+		private Task UpdateStateAndReportAsync (SearchResult<IPackageSearchMetadata> searchResult, IProgress<IItemLoaderState> progress)
 		{
 			// cache installed packages here for future use
 			//_installedPackages = await _context.GetInstalledPackagesAsync();
 
-			var state = new PackageFeedSearchState(searchResult);
+			var state = new PackageFeedSearchState (searchResult);
 			_state = state;
-			progress?.Report(state);
-		}
-		#pragma warning restore 1998 // Async method lacks 'await' operators and will run synchronously
-
-		public void Reset()
-		{
-			_state = new PackageFeedSearchState();
+			progress?.Report (state);
+			return Task.CompletedTask;
 		}
 
-		public IEnumerable<PackageItemListViewModel> GetCurrent()
+		public void Reset ()
 		{
-			if (_state.ItemsCount == 0)
-			{
-				return Enumerable.Empty<PackageItemListViewModel>();
+			_state = new PackageFeedSearchState ();
+		}
+
+		public IEnumerable<PackageItemListViewModel> GetCurrent ()
+		{
+			if (_state.ItemsCount == 0) {
+				return Enumerable.Empty<PackageItemListViewModel> ();
 			}
 
 			var listItems = _state.Results
-			                      .Select(metadata =>
-			{
-				var listItem = new PackageItemListViewModel
-				{
-					Id = metadata.Identity.Id,
-					Version = metadata.Identity.Version,
-					IconUrl = metadata.IconUrl,
-					Author = metadata.Authors,
-					DownloadCount = metadata.DownloadCount,
-					Summary = metadata.Summary,
-					Description = metadata.Description,
-					Title = metadata.Title,
-					LicenseUrl = metadata.LicenseUrl,
-					ProjectUrl = metadata.ProjectUrl,
-					Published = metadata.Published,
-					Versions = AsyncLazy.New(() => metadata.GetVersionsAsync())
-				};
-				/*listItem.UpdatePackageStatus(_installedPackages);
+				  .Select (metadata =>
+				  {
+					  var listItem = new PackageItemListViewModel {
+						  Id = metadata.Identity.Id,
+						  Version = metadata.Identity.Version,
+						  IconUrl = metadata.IconUrl,
+						  Author = metadata.Authors,
+						  DownloadCount = metadata.DownloadCount,
+						  Summary = metadata.Summary,
+						  Description = metadata.Description,
+						  Title = metadata.Title,
+						  LicenseUrl = metadata.LicenseUrl,
+						  ProjectUrl = metadata.ProjectUrl,
+						  Published = metadata.Published,
+						  Versions = AsyncLazy.New (() => metadata.GetVersionsAsync ())
+					  };
+					  /*listItem.UpdatePackageStatus(_installedPackages);
 
-				if (!_context.IsSolution && _context.PackageManagerProviders.Any())
-				{
-					listItem.ProvidersLoader = AsyncLazy.New(
-						() => AlternativePackageManagerProviders.CalculateAlternativePackageManagersAsync(
-							_context.PackageManagerProviders,
-							listItem.Id,
-							_context.Projects[0]));
-				}*/
+					  if (!_context.IsSolution && _context.PackageManagerProviders.Any())
+					  {
+						  listItem.ProvidersLoader = AsyncLazy.New(
+							  () => AlternativePackageManagerProviders.CalculateAlternativePackageManagersAsync(
+								  _context.PackageManagerProviders,
+								  listItem.Id,
+								  _context.Projects[0]));
+					  }*/
 
-				return listItem;
-			});
+					  return listItem;
+				  });
 
-			return listItems.ToArray();
+			return listItems.ToArray ();
 		}
 	}
 }

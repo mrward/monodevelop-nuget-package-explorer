@@ -60,26 +60,14 @@ namespace MonoDevelop.PackageManagement
 
 			var projectSystem = new MonoDevelopMSBuildNuGetProjectSystem (project, context);
 
-			string projectJsonPath = ProjectJsonPathUtilities.GetProjectConfigPath (project.BaseDirectory, project.Name);
-
-			if (File.Exists (projectJsonPath)) {
-				return new BuildIntegratedProjectSystem (
-					projectJsonPath,
-					project.FileName,
-					project,
-					projectSystem,
-					project.Name,
-					settings);
-			}
-
 			string baseDirectory = GetBaseDirectory (project);
 			string folderNuGetProjectFullPath = PackagesFolderPathUtility.GetPackagesFolderPath (baseDirectory, settings);
 
 			string packagesConfigFolderPath = project.BaseDirectory;
 
 			return new MSBuildNuGetProject (
-				projectSystem, 
-				folderNuGetProjectFullPath, 
+				projectSystem,
+				folderNuGetProjectFullPath,
 				packagesConfigFolderPath);
 		}
 

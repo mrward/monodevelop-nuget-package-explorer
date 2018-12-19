@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>MonoDevelop.NuGetPackageExplorer</RootNamespace>
     <AssemblyName>MonoDevelop.NuGetPackageExplorer</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,7 +30,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="NuGet">
-      <HintPath>..\packages\NuGet.CommandLine.3.4.3\tools\NuGet.exe</HintPath>
+      <HintPath>..\..\lib\NuGet.Merged.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml" />
@@ -46,6 +46,7 @@
       <HintPath>..\packages\Lucene.Net.3.0.3\lib\NET40\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cairo, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -96,12 +97,6 @@
     <Compile Include="NuGet.PackageManagement.UI\SourceRepositoryExtensions.cs" />
     <Compile Include="NuGet.PackageManagement.UI\TaskCombinators.cs" />
     <Compile Include="MonoDevelop.PackageManagement\ImageCache.cs" />
-    <Compile Include="NuGet.Indexing\DownloadCountResultsIndexer.cs" />
-    <Compile Include="NuGet.Indexing\ISearchResultsAggregator.cs" />
-    <Compile Include="NuGet.Indexing\ISearchResultsIndexer.cs" />
-    <Compile Include="NuGet.Indexing\PackageAnalyzer.cs" />
-    <Compile Include="NuGet.Indexing\RelevanceSearchResultsIndexer.cs" />
-    <Compile Include="NuGet.Indexing\SearchResultsAggregator.cs" />
     <Compile Include="MonoDevelop.PackageManagement\DeleteOnRestartManager.cs" />
     <Compile Include="MonoDevelop.PackageManagement\AggregateSourceRepositoryViewModel.cs" />
     <Compile Include="MonoDevelop.PackageManagement\AggregatePackageSourceErrorMessage.cs" />
@@ -114,31 +109,16 @@
     <Compile Include="MonoDevelop.PackageManagement\MonoDevelopNuGetProjectFactory.cs" />
     <Compile Include="MonoDevelop.PackageManagement\SettingsLoader.cs" />
     <Compile Include="MonoDevelop.PackageManagement\MonoDevelopMSBuildNuGetProjectSystem.cs" />
-    <Compile Include="MonoDevelop.PackageManagement\BuildIntegrationProjectSystem.cs" />
     <Compile Include="MonoDevelop.PackageManagement\ProjectTargetFramework.cs" />
-    <Compile Include="NuGet.Indexing\CamelCaseFilter.cs" />
-    <Compile Include="NuGet.Indexing\DotTokenizer.cs" />
-    <Compile Include="NuGet.Indexing\IdentifierAnalyzer.cs" />
-    <Compile Include="NuGet.Indexing\IdentifierKeywordAnalyzer.cs" />
-    <Compile Include="NuGet.Indexing\NuGetQuery.cs" />
-    <Compile Include="NuGet.Indexing\OwnerAnalyzer.cs" />
-    <Compile Include="NuGet.Indexing\SemanticVersionFilter.cs" />
-    <Compile Include="NuGet.Indexing\TagsAnalyzer.cs" />
-    <Compile Include="NuGet.Indexing\TokenizingHelper.cs" />
-    <Compile Include="NuGet.Indexing\VersionAnalyzer.cs" />
-    <Compile Include="NuGet.Indexing\DescriptionAnalyzer.cs" />
     <Compile Include="MonoDevelop.PackageManagement\SourceRepositoryProvider.cs" />
     <Compile Include="MonoDevelop.PackageManagement\MonoDevelopPackageSourceProvider.cs" />
-    <Compile Include="NuGet.Protocol.VisualStudio\PackageMetadataResourceLocalProvider.cs" />
-    <Compile Include="NuGet.Protocol.VisualStudio\PackageSearchResourceLocalProvider.cs" />
-    <Compile Include="NuGet.Protocol.VisualStudio\PackageSearchResourceLocal.cs" />
     <Compile Include="MonoDevelop.PackageManagement\PackageListViewTextFormatter.cs" />
-    <Compile Include="NuGet.Protocol.VisualStudio\PackageMetadataResourceLocal.cs" />
     <Compile Include="MonoDevelop.PackageManagement\AggregateExceptionErrorMessage.cs" />
     <Compile Include="MonoDevelop.PackageManagement\PackageSearchResultViewModelComparer.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\OpenNuGetPackageFromSourceHandler.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\DummyDotNetProject.cs" />
     <Compile Include="MonoDevelop.NuGetPackageExplorer\PackageDependencyNode.cs" />
+    <Compile Include="MonoDevelop.PackageManagement\HttpClientFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml" />
@@ -168,7 +148,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="NuGet.Indexing\" />
     <Folder Include="Icons\" />
   </ItemGroup>
   <ItemGroup>

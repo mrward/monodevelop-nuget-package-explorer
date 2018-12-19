@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Packaging.Core;
+using NuGet.ProjectManagement;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
@@ -20,154 +21,195 @@ namespace NuGet.PackageManagement.UI
 	{
 		private readonly IEnumerable<SourceRepository> _sourceRepositories;
 		private readonly SourceRepository _localRepository;
-		private readonly SourceRepository _globalLocalRepository;
-		private readonly Logging.ILogger _logger;
+		private readonly IEnumerable<SourceRepository> _globalLocalRepositories;
+		private readonly Common.ILogger _logger;
+		private readonly NuGetProject[] _projects;
+		private readonly bool _isSolution;
+		private IEnumerable<Packaging.PackageReference> _packageReferences;
 
-		public MultiSourcePackageMetadataProvider(
+		public MultiSourcePackageMetadataProvider (
 			IEnumerable<SourceRepository> sourceRepositories,
 			SourceRepository optionalLocalRepository,
-			SourceRepository optionalGlobalLocalRepository,
-			Logging.ILogger logger)
+			IEnumerable<SourceRepository> optionalGlobalLocalRepositories,
+			NuGetProject[] projects,
+			bool isSolution,
+			Common.ILogger logger)
 		{
-			if (sourceRepositories == null)
-			{
-				throw new ArgumentNullException(nameof(sourceRepositories));
+			if (sourceRepositories == null) {
+				throw new ArgumentNullException (nameof (sourceRepositories));
+			}
+
+			if (projects == null) {
+				throw new ArgumentNullException (nameof (projects));
 			}
 			_sourceRepositories = sourceRepositories;
 
 			_localRepository = optionalLocalRepository;
 
-			_globalLocalRepository = optionalGlobalLocalRepository;
+			_globalLocalRepositories = optionalGlobalLocalRepositories;
 
-			if (logger == null)
-			{
-				throw new ArgumentNullException(nameof(logger));
+			_projects = projects;
+
+			_isSolution = isSolution;
+
+			if (logger == null) {
+				throw new ArgumentNullException (nameof (logger));
 			}
 			_logger = logger;
 		}
 
-		public async Task<IPackageSearchMetadata> GetPackageMetadataAsync(PackageIdentity identity, bool includePrerelease, CancellationToken cancellationToken)
+		public async Task<IPackageSearchMetadata> GetPackageMetadataAsync (PackageIdentity identity, bool includePrerelease, CancellationToken cancellationToken)
 		{
 			var tasks = _sourceRepositories
-				.Select(r => r.GetPackageMetadataAsync(identity, includePrerelease, cancellationToken))
-				.ToList();
+				.Select (r => r.GetPackageMetadataAsync (identity, includePrerelease, cancellationToken))
+				.ToList ();
 
-			if (_localRepository != null)
-			{
-				tasks.Add(_localRepository.GetPackageMetadataFromLocalSourceAsync(identity, cancellationToken));
+			if (_localRepository != null) {
+				tasks.Add (_localRepository.GetPackageMetadataFromLocalSourceAsync (identity, cancellationToken));
 			}
 
-			tasks
-				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
-				.ToArray();
+			var ignored = tasks
+				.Select (task => task.ContinueWith (LogError, TaskContinuationOptions.OnlyOnFaulted))
+				.ToArray ();
 
-			var completed = (await Task.WhenAll(tasks))
-				.Where(m => m != null);
+			var completed = (await Task.WhenAll (tasks))
+				.Where (m => m != null);
 
-			var master = completed.FirstOrDefault(m => !string.IsNullOrEmpty(m.Summary))
-				?? completed.FirstOrDefault()
-				?? PackageSearchMetadataBuilder.FromIdentity(identity).Build();
+			var master = completed.FirstOrDefault (m => !string.IsNullOrEmpty (m.Summary))
+				?? completed.FirstOrDefault ()
+				?? PackageSearchMetadataBuilder.FromIdentity (identity).Build ();
 
-			return master.WithVersions(
-				asyncValueFactory: () => MergeVersionsAsync(identity, completed));
+			return master.WithVersions (
+				asyncValueFactory: () => MergeVersionsAsync (identity, completed));
 		}
 
-		public async Task<IPackageSearchMetadata> GetLatestPackageMetadataAsync(PackageIdentity identity,
+		public async Task<IPackageSearchMetadata> GetLatestPackageMetadataAsync (PackageIdentity identity,
 			bool includePrerelease, CancellationToken cancellationToken)
 		{
-			var tasks = _sourceRepositories
-				.Select(r => r.GetLatestPackageMetadataAsync(identity.Id, includePrerelease, cancellationToken))
-				.ToArray();
+			VersionRange allowedVersions = VersionRange.All;
 
-			tasks
-				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
-				.ToArray();
+			// at this time, allowed version range should be applied at project level. 
+			// For solution level, we will apply allowed version range for all the selected projects in detail control model
+			if (!_isSolution) {
+				if (_packageReferences == null) {
+					// get all package references for all the projects and cache locally
+					var packageReferencesTasks = _projects.Select (project => project.GetInstalledPackagesAsync (cancellationToken));
+					_packageReferences = (await Task.WhenAll (packageReferencesTasks)).SelectMany (p => p).Where (p => p != null);
+				}
 
-			var completed = (await Task.WhenAll(tasks))
-				.Where(m => m != null);
+				// filter package references for current package identity
+				var matchedPackageReferences = _packageReferences.Where (r => StringComparer.OrdinalIgnoreCase.Equals (r.PackageIdentity.Id, identity.Id));
 
-			var highest = completed
-				.OrderByDescending(e => e.Identity.Version, VersionComparer.VersionRelease)
-				.FirstOrDefault();
+				// Allowed version range for current package across all selected projects
+				var allowedVersionsRange = matchedPackageReferences.Select (r => r.AllowedVersions).Where (v => v != null).ToArray ();
 
-			return highest?.WithVersions(
-				asyncValueFactory: () => MergeVersionsAsync(identity, completed));
-		}
-
-		public async Task<IEnumerable<IPackageSearchMetadata>> GetPackageMetadataListAsync(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken)
-		{
-			var tasks = _sourceRepositories
-				.Select(r => r.GetPackageMetadataListAsync(packageId, includePrerelease, includeUnlisted, cancellationToken))
-				.ToArray();
-
-			tasks
-				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
-				.ToArray();
-
-			var completed = (await Task.WhenAll(tasks))
-				.Where(m => m != null);
-
-			return completed.SelectMany(p => p);
-		}
-
-		public async Task<IPackageSearchMetadata> GetLocalPackageMetadataAsync(PackageIdentity identity, bool includePrerelease, CancellationToken cancellationToken)
-		{
-			var result = await _localRepository.GetPackageMetadataFromLocalSourceAsync(identity, cancellationToken);
-
-			if (result == null)
-			{
-				if (_globalLocalRepository != null)
-					result = await _globalLocalRepository.GetPackageMetadataFromLocalSourceAsync(identity, cancellationToken);
-
-				if (result == null)
-				{
-					return null;
+				if (allowedVersionsRange.Length > 0) {
+					allowedVersions = allowedVersionsRange[0];
 				}
 			}
 
-			return result.WithVersions(asyncValueFactory: () => FetchAndMergeVersionsAsync(identity, includePrerelease, cancellationToken));
+			var tasks = _sourceRepositories
+				.Select (r => r.GetLatestPackageMetadataAsync (identity.Id, includePrerelease, cancellationToken, allowedVersions))
+				.ToArray ();
+
+			var ignored = tasks
+				.Select (task => task.ContinueWith (LogError, TaskContinuationOptions.OnlyOnFaulted))
+				.ToArray ();
+
+			var completed = (await Task.WhenAll (tasks))
+				.Where (m => m != null);
+
+			var highest = completed.MaxValueOrDefault (e => e.Identity.Version, VersionComparer.VersionRelease);
+
+			return highest?.WithVersions (
+				asyncValueFactory: () => MergeVersionsAsync (identity, completed));
 		}
 
-		private static async Task<IEnumerable<VersionInfo>> MergeVersionsAsync(PackageIdentity identity, IEnumerable<IPackageSearchMetadata> packages)
-		{
-			var versions = await Task.WhenAll(packages.Select(m => m.GetVersionsAsync()));
-
-			var allVersions = versions
-				.SelectMany(v => v)
-				.Concat(new[] { new VersionInfo(identity.Version) });
-
-			return allVersions
-				.GroupBy(v => v.Version, v => v.DownloadCount)
-				.Select(g => new VersionInfo(g.Key, g.Max()))
-				.ToArray();
-		}
-
-		private async Task<IEnumerable<VersionInfo>> FetchAndMergeVersionsAsync(PackageIdentity identity, bool includePrerelease, CancellationToken cancellationToken)
+		public async Task<IEnumerable<IPackageSearchMetadata>> GetPackageMetadataListAsync (string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken)
 		{
 			var tasks = _sourceRepositories
-				.Select(r => r.GetPackageMetadataAsync(identity, includePrerelease, cancellationToken))
-				.ToList();
+				.Select (r => r.GetPackageMetadataListAsync (packageId, includePrerelease, includeUnlisted, cancellationToken))
+				.ToArray ();
 
-			if (_localRepository != null)
-			{
-				tasks.Add(_localRepository.GetPackageMetadataFromLocalSourceAsync(identity, cancellationToken));
-			}
+			var ignored = tasks
+				.Select (task => task.ContinueWith (LogError, TaskContinuationOptions.OnlyOnFaulted))
+				.ToArray ();
 
-			tasks
-				.Select(task => task.ContinueWith(LogError, TaskContinuationOptions.OnlyOnFaulted))
-				.ToArray();
+			var completed = (await Task.WhenAll (tasks))
+				.Where (m => m != null);
 
-			var completed = (await Task.WhenAll(tasks))
-				.Where(m => m != null);
-
-			return await MergeVersionsAsync(identity, completed);
+			return completed.SelectMany (p => p);
 		}
 
-		private void LogError(Task task)
+		/// <summary>
+		/// Get package metadata from the package folders.
+		/// </summary>
+		public async Task<IPackageSearchMetadata> GetLocalPackageMetadataAsync (
+			PackageIdentity identity,
+			bool includePrerelease,
+			CancellationToken cancellationToken)
 		{
-			foreach (var ex in task.Exception.Flatten().InnerExceptions)
-			{
-				_logger.LogError(ex.ToString());
+			var sources = new List<SourceRepository> ();
+
+			if (_localRepository != null) {
+				sources.Add (_localRepository);
+			}
+
+			if (_globalLocalRepositories != null) {
+				sources.AddRange (_globalLocalRepositories);
+			}
+
+			// Take the package from the first source it is found in
+			foreach (var source in sources) {
+				var result = await source.GetPackageMetadataFromLocalSourceAsync (identity, cancellationToken);
+
+				if (result != null) {
+					return result.WithVersions (asyncValueFactory:
+											   () => FetchAndMergeVersionsAsync (identity, includePrerelease, cancellationToken));
+				}
+			}
+
+			return null;
+		}
+
+		private static async Task<IEnumerable<VersionInfo>> MergeVersionsAsync (PackageIdentity identity, IEnumerable<IPackageSearchMetadata> packages)
+		{
+			var versions = await Task.WhenAll (packages.Select (m => m.GetVersionsAsync ()));
+
+			var allVersions = versions
+				.SelectMany (v => v)
+				.Concat (new[] { new VersionInfo (identity.Version) });
+
+			return allVersions
+				.GroupBy (v => v.Version)
+				.Select (g => g.MinValue (v => v.DownloadCount ?? default (long)))
+				.ToArray ();
+		}
+
+		private async Task<IEnumerable<VersionInfo>> FetchAndMergeVersionsAsync (PackageIdentity identity, bool includePrerelease, CancellationToken cancellationToken)
+		{
+			var tasks = _sourceRepositories
+				.Select (r => r.GetPackageMetadataAsync (identity, includePrerelease, cancellationToken))
+				.ToList ();
+
+			if (_localRepository != null) {
+				tasks.Add (_localRepository.GetPackageMetadataFromLocalSourceAsync (identity, cancellationToken));
+			}
+
+			var ignored = tasks
+				.Select (task => task.ContinueWith (LogError, TaskContinuationOptions.OnlyOnFaulted))
+				.ToArray ();
+
+			var completed = (await Task.WhenAll (tasks))
+				.Where (m => m != null);
+
+			return await MergeVersionsAsync (identity, completed);
+		}
+
+		private void LogError (Task task)
+		{
+			foreach (var ex in task.Exception.Flatten ().InnerExceptions) {
+				_logger.LogError (ex.ToString ());
 			}
 		}
 	}

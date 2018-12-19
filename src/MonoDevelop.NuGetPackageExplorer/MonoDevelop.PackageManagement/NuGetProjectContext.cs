@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Xml.Linq;
 using NuGet.PackageManagement;
 using NuGet.Packaging;
@@ -47,6 +48,7 @@ namespace MonoDevelop.PackageManagement
 
 		public NuGetActionType ActionType { get; set; }
 		public XDocument OriginalPackagesConfig { get; set; }
+		public Guid OperationId { get; set; }
 		public PackageExtractionContext PackageExtractionContext { get; set; }
 
 		public ISourceControlManagerProvider SourceControlManagerProvider {

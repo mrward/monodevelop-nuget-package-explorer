@@ -37,11 +37,12 @@ using NuGet.ProjectManagement;
 
 namespace MonoDevelop.PackageManagement
 {
-	internal class MonoDevelopMSBuildNuGetProjectSystem : IMSBuildNuGetProjectSystem
+	internal class MonoDevelopMSBuildNuGetProjectSystem : IMSBuildProjectSystem
 	{
 		DotNetProject project;
 		NuGetFramework targetFramework;
 		string projectFullPath;
+		string projectFileFullPath;
 		Action<Action> guiSyncDispatcher;
 		Func<Func<Task>,Task> guiSyncDispatcherFunc;
 
@@ -66,7 +67,7 @@ namespace MonoDevelop.PackageManagement
 			this.guiSyncDispatcherFunc = guiSyncDispatcherFunc;
 		}
 
-		public INuGetProjectContext NuGetProjectContext { get; private set; }
+		public INuGetProjectContext NuGetProjectContext { get; set; }
 
 		public string ProjectFullPath {
 			get {
@@ -74,6 +75,15 @@ namespace MonoDevelop.PackageManagement
 					projectFullPath = GuiSyncDispatch (() => project.BaseDirectory);
 				}
 				return projectFullPath;
+			}
+		}
+
+		public string ProjectFileFullPath {
+			get {
+				if (projectFileFullPath == null) {
+					projectFileFullPath = GuiSyncDispatch (() => project.FileName);
+				}
+				return projectFileFullPath;
 			}
 		}
 
@@ -150,8 +160,9 @@ namespace MonoDevelop.PackageManagement
 			DebugLogFormat("Added file '{0}' to project '{1}'.", fileName, projectName);
 		}
 
-		public void AddFrameworkReference (string name)
+		public Task AddFrameworkReferenceAsync (string name, string packageId)
 		{
+			return Task.CompletedTask;
 		}
 
 		ProjectReference CreateGacReference (string name)
@@ -173,8 +184,9 @@ namespace MonoDevelop.PackageManagement
 			return MSBuildProjectService.ToMSBuildPath (project.BaseDirectory, path);
 		}
 
-		public void AddReference (string referencePath)
+		public Task AddReferenceAsync (string referencePath)
 		{
+			return Task.CompletedTask;
 		}
 
 		ProjectReference CreateReference (string referencePath)
@@ -203,8 +215,9 @@ namespace MonoDevelop.PackageManagement
 			NuGetProjectContext.Log (MessageLevel.Debug, format, args);
 		}
 
-		public void BeginProcessing ()
+		public Task BeginProcessingAsync ()
 		{
+			return Task.FromResult (true);
 		}
 
 		public void DeleteDirectory (string path, bool recursive)
@@ -216,8 +229,9 @@ namespace MonoDevelop.PackageManagement
 			DebugLogFormat ("Removed folder '{0}'.", folder);
 		}
 
-		public void EndProcessing ()
+		public Task EndProcessingAsync ()
 		{
+			return Task.FromResult (true);
 		}
 
 		public Task ExecuteScriptAsync (PackageIdentity identity, string packageInstallPath, string scriptRelativePath, NuGetProject nuGetProject, bool throwOnFailure)
@@ -307,15 +321,9 @@ namespace MonoDevelop.PackageManagement
 			return IsMatchIgnoringCase (fileName1, fileName2);
 		}
 
-		public bool ReferenceExists (string name)
+		public Task<bool> ReferenceExistsAsync (string name)
 		{
-			return GuiSyncDispatch (() => {
-				ProjectReference referenceProjectItem = FindReference (name);
-				if (referenceProjectItem != null) {
-					return true;
-				}
-				return false;
-			});
+			return Task.FromResult (true);
 		}
 
 		ProjectReference FindReference (string name)
@@ -405,8 +413,9 @@ namespace MonoDevelop.PackageManagement
 			project.RemoveImport (relativeTargetPath);
 		}
 
-		public void RemoveReference (string name)
+		public Task RemoveReferenceAsync (string name)
 		{
+			return Task.CompletedTask;
 		}
 
 		void LogRemovedReferenceFromProject (ProjectReference referenceProjectItem)

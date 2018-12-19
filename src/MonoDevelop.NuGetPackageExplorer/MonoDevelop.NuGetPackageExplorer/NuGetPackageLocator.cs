@@ -48,7 +48,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			var settings = Settings.LoadDefaultSettings (project.ParentSolution.BaseDirectory, null, null);
 
 			string globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder (settings);
-			var packagePathResolver = new VersionFolderPathResolver (globalPackagesFolder, normalizePackageId: false);
+			var packagePathResolver = new VersionFolderPathResolver (globalPackagesFolder);
 			string packagePath = packagePathResolver.GetPackageFilePath (packageIdentity.Id, packageIdentity.Version);
 			if (File.Exists (packagePath))
 				return packagePath;

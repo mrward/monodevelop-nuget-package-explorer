@@ -34,8 +34,8 @@ using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
 using MonoDevelop.PackageManagement;
+using NuGet.Common;
 using NuGet.Configuration;
-using NuGet.Logging;
 using NuGet.PackageManagement;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
@@ -149,18 +149,22 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 			try {
 				var packageIdentity = new PackageIdentity (package.Id, package.SelectedVersion);
-				using (DownloadResourceResult result = await PackageDownloader.GetDownloadResourceResultAsync (
-					repositories, packageIdentity, settings, NullLogger.Instance, tokenSource.Token)) {
+				string folder = SettingsUtility.GetGlobalPackagesFolder (settings);
+				using (var sourceCacheContext = new SourceCacheContext ()) {
+					var context = new PackageDownloadContext (sourceCacheContext);
+					using (DownloadResourceResult result = await PackageDownloader.GetDownloadResourceResultAsync (
+						repositories, packageIdentity, context, folder, NullLogger.Instance, tokenSource.Token)) {
 
-					if (result.Status == DownloadResourceResultStatus.Available) {
-						reader = result.PackageReader;
-						var nuspecReader = new NuspecReader (reader.GetNuspec ());
-						ShowMetadata (nuspecReader);
-					} else if (result.Status == DownloadResourceResultStatus.NotFound) {
-						packageMetadataView.ShowError (GettextCatalog.GetString ("Package not found."));
+						if (result.Status == DownloadResourceResultStatus.Available) {
+							reader = result.PackageReader;
+							var nuspecReader = new NuspecReader (reader.GetNuspec ());
+							ShowMetadata (nuspecReader);
+						} else if (result.Status == DownloadResourceResultStatus.NotFound) {
+							packageMetadataView.ShowError (GettextCatalog.GetString ("Package not found."));
+						}
+
+						packageMetadataView.IsDownloading = false;
 					}
-
-					packageMetadataView.IsDownloading = false;
 				}
 			} catch (OperationCanceledException) {
 				// Ignore.
@@ -213,6 +217,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 				GetPackageExtractDirectory (),
 				new [] { packageFile },
 				ExtractFile,
+				NullLogger.Instance,
 				CancellationToken.None);
 		}
 

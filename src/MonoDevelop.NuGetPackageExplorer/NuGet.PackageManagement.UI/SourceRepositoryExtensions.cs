@@ -17,64 +17,56 @@ namespace NuGet.PackageManagement.UI
 	/// </summary>
 	internal static class SourceRepositoryExtensions
 	{
-		public static Task<SearchResult<IPackageSearchMetadata>> SearchAsync(this SourceRepository sourceRepository, string searchText, SearchFilter searchFilter, int pageSize, CancellationToken cancellationToken)
+		public static Task<SearchResult<IPackageSearchMetadata>> SearchAsync (this SourceRepository sourceRepository, string searchText, SearchFilter searchFilter, int pageSize, CancellationToken cancellationToken)
 		{
-			var searchToken = new FeedSearchContinuationToken
-			{
+			var searchToken = new FeedSearchContinuationToken {
 				SearchString = searchText,
 				SearchFilter = searchFilter,
 				StartIndex = 0
 			};
 
-			return sourceRepository.SearchAsync(searchToken, pageSize, cancellationToken);
+			return sourceRepository.SearchAsync (searchToken, pageSize, cancellationToken);
 		}
 
-		public static async Task<SearchResult<IPackageSearchMetadata>> SearchAsync(
+		public static async Task<SearchResult<IPackageSearchMetadata>> SearchAsync (
 			this SourceRepository sourceRepository, ContinuationToken continuationToken, int pageSize, CancellationToken cancellationToken)
 		{
 			var searchToken = continuationToken as FeedSearchContinuationToken;
-			if (searchToken == null)
-			{
-				throw new InvalidOperationException("Invalid token");
+			if (searchToken == null) {
+				throw new InvalidOperationException ("Invalid token");
 			}
 
-			var searchResource = await sourceRepository.GetResourceAsync<PackageSearchResource>(cancellationToken);
+			var searchResource = await sourceRepository.GetResourceAsync<PackageSearchResource> (cancellationToken);
 
-			IEnumerable<IPackageSearchMetadata> searchResults = null;
-			if (searchResource != null) {
-				searchResults = await searchResource.SearchAsync(
+			var searchResults = await searchResource?.SearchAsync (
 				searchToken.SearchString,
 				searchToken.SearchFilter,
 				searchToken.StartIndex,
 				pageSize + 1,
-				Logging.NullLogger.Instance,
+				Common.NullLogger.Instance,
 				cancellationToken);
-			}
 
-			var items = searchResults?.ToArray() ?? new IPackageSearchMetadata[] { };
+			var items = searchResults?.ToArray () ?? new IPackageSearchMetadata[] { };
 
 			var hasMoreItems = items.Length > pageSize;
-			if (hasMoreItems)
-			{
-				items = items.Take(items.Length - 1).ToArray();
+			if (hasMoreItems) {
+				items = items.Take (items.Length - 1).ToArray ();
 			}
 
-			var result = SearchResult.FromItems(items);
+			var result = SearchResult.FromItems (items);
 
 			var loadingStatus = hasMoreItems
 				? LoadingStatus.Ready
-			                   : items.Length == 0
-			                   ? LoadingStatus.NoItemsFound
-			                   : LoadingStatus.NoMoreItems;
+							   : items.Length == 0
+							   ? LoadingStatus.NoItemsFound
+							   : LoadingStatus.NoMoreItems;
 			result.SourceSearchStatus = new Dictionary<string, LoadingStatus>
 			{
 				{ sourceRepository.PackageSource.Name, loadingStatus }
 			};
 
-			if (hasMoreItems)
-			{
-				result.NextToken = new FeedSearchContinuationToken
-				{
+			if (hasMoreItems) {
+				result.NextToken = new FeedSearchContinuationToken {
 					SearchString = searchToken.SearchString,
 					SearchFilter = searchToken.SearchFilter,
 					StartIndex = searchToken.StartIndex + items.Length
@@ -84,132 +76,135 @@ namespace NuGet.PackageManagement.UI
 			return result;
 		}
 
-		public static async Task<IPackageSearchMetadata> GetPackageMetadataAsync(
+		public static async Task<IPackageSearchMetadata> GetPackageMetadataAsync (
 			this SourceRepository sourceRepository, PackageIdentity identity, bool includePrerelease, CancellationToken cancellationToken)
 		{
-			var metadataResource = await sourceRepository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
-			IEnumerable<IPackageSearchMetadata> packages = null;
-			if (metadataResource != null) {
-				packages = await metadataResource.GetMetadataAsync(
-					identity.Id,
-					includePrerelease: true,
-					includeUnlisted: false,
-					log: Logging.NullLogger.Instance,
-					token: cancellationToken);
+			var metadataResource = await sourceRepository.GetResourceAsync<PackageMetadataResource> (cancellationToken);
+
+			using (var sourceCacheContext = new SourceCacheContext ()) {
+				var packages = await metadataResource?.GetMetadataAsync (
+				identity.Id,
+				includePrerelease: true,
+				includeUnlisted: false,
+				sourceCacheContext: sourceCacheContext,
+				log: Common.NullLogger.Instance,
+				token: cancellationToken);
+
+				if (packages?.FirstOrDefault () == null) {
+					return null;
+				}
+
+				var packageMetadata = packages
+					.FirstOrDefault (p => p.Identity.Version == identity.Version)
+					?? PackageSearchMetadataBuilder.FromIdentity (identity).Build ();
+
+				return packageMetadata.WithVersions (ToVersionInfo (packages, includePrerelease));
 			}
-
-			if (packages?.FirstOrDefault() == null)
-			{
-				return null;
-			}
-
-			var packageMetadata = packages
-				.FirstOrDefault(p => p.Identity.Version == identity.Version)
-				?? PackageSearchMetadataBuilder.FromIdentity(identity).Build();
-
-			return packageMetadata.WithVersions(ToVersionInfo(packages, includePrerelease));
 		}
 
-		public static async Task<IPackageSearchMetadata> GetPackageMetadataFromLocalSourceAsync(
+		public static async Task<IPackageSearchMetadata> GetPackageMetadataFromLocalSourceAsync (
 			this SourceRepository localRepository, PackageIdentity identity, CancellationToken cancellationToken)
 		{
-			var localResource = await localRepository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
-			IEnumerable<IPackageSearchMetadata> localPackages = null;
-			if (localResource != null) {
-				localPackages = await localResource.GetMetadataAsync(
-					identity.Id,
-					includePrerelease: true,
-					includeUnlisted: true,
-					log: Logging.NullLogger.Instance,
-					token: cancellationToken);
+			var localResource = await localRepository.GetResourceAsync<PackageMetadataResource> (cancellationToken);
+
+			using (var sourceCacheContext = new SourceCacheContext ()) {
+				var localPackages = await localResource?.GetMetadataAsync (
+				identity.Id,
+				includePrerelease: true,
+				includeUnlisted: true,
+				sourceCacheContext: sourceCacheContext,
+				log: Common.NullLogger.Instance,
+				token: cancellationToken);
+
+				var packageMetadata = localPackages?.FirstOrDefault (p => p.Identity.Version == identity.Version);
+
+				var versions = new[]
+				{
+					new VersionInfo(identity.Version)
+				};
+
+				return packageMetadata?.WithVersions (versions);
 			}
-
-			var packageMetadata = localPackages?.FirstOrDefault(p => p.Identity.Version == identity.Version);
-
-			var versions = new[]
-			{
-				new VersionInfo(identity.Version)
-			};
-
-			return packageMetadata?.WithVersions(versions);
 		}
 
-		public static async Task<IPackageSearchMetadata> GetLatestPackageMetadataAsync(
-			this SourceRepository sourceRepository, string packageId, bool includePrerelease, CancellationToken cancellationToken)
+		public static async Task<IPackageSearchMetadata> GetLatestPackageMetadataAsync (
+			this SourceRepository sourceRepository, string packageId, bool includePrerelease, CancellationToken cancellationToken, VersionRange allowedVersions)
 		{
-			var metadataResource = await sourceRepository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
-			IEnumerable<IPackageSearchMetadata> packages = null;
-			if (metadataResource != null) {
-				packages = await metadataResource.GetMetadataAsync(
-					packageId,
-					includePrerelease,
-					false,
-					Logging.NullLogger.Instance,
-					cancellationToken);
+			var metadataResource = await sourceRepository.GetResourceAsync<PackageMetadataResource> (cancellationToken);
+			using (var sourceCacheContext = new SourceCacheContext ()) {
+				var packages = await metadataResource?.GetMetadataAsync (
+				packageId,
+				includePrerelease,
+				false,
+				sourceCacheContext,
+				Common.NullLogger.Instance,
+				cancellationToken);
+
+				// filter packages based on allowed versions
+				var updatedPackages = packages.Where (p => allowedVersions.Satisfies (p.Identity.Version));
+
+				var highest = updatedPackages
+					.MaxValueOrDefault (e => e.Identity.Version, VersionComparer.VersionRelease);
+
+				return highest?.WithVersions (ToVersionInfo (packages, includePrerelease));
 			}
-
-			var highest = packages?
-				.OrderByDescending(e => e.Identity.Version, VersionComparer.VersionRelease)
-				.FirstOrDefault();
-
-			return highest?.WithVersions(ToVersionInfo(packages, includePrerelease));
 		}
 
-		public static async Task<IEnumerable<IPackageSearchMetadata>> GetPackageMetadataListAsync(
+		public static async Task<IEnumerable<IPackageSearchMetadata>> GetPackageMetadataListAsync (
 			this SourceRepository sourceRepository, string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken)
 		{
-			var metadataResource = await sourceRepository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
-			IEnumerable<IPackageSearchMetadata> packages = null;
-			if (metadataResource != null) {
-				packages = await metadataResource.GetMetadataAsync(
-					packageId,
-					includePrerelease,
-					includeUnlisted,
-					Logging.NullLogger.Instance,
-					cancellationToken);
+			var metadataResource = await sourceRepository.GetResourceAsync<PackageMetadataResource> (cancellationToken);
+			using (var sourceCacheContext = new SourceCacheContext ()) {
+				var packages = await metadataResource?.GetMetadataAsync (
+				packageId,
+				includePrerelease,
+				includeUnlisted,
+				sourceCacheContext,
+				Common.NullLogger.Instance,
+				cancellationToken);
+
+				return packages;
 			}
-			return packages;
 		}
 
-		private static IEnumerable<VersionInfo> ToVersionInfo(IEnumerable<IPackageSearchMetadata> packages, bool includePrerelease)
+		private static IEnumerable<VersionInfo> ToVersionInfo (IEnumerable<IPackageSearchMetadata> packages, bool includePrerelease)
 		{
 			return packages?
-				.Where(v => includePrerelease || !v.Identity.Version.IsPrerelease)
-				.OrderByDescending(m => m.Identity.Version, VersionComparer.VersionRelease)
-				.Select(m => new VersionInfo(m.Identity.Version, m.DownloadCount));
+				.Where (v => includePrerelease || !v.Identity.Version.IsPrerelease)
+				.OrderByDescending (m => m.Identity.Version, VersionComparer.VersionRelease)
+				.Select (m => new VersionInfo (m.Identity.Version, m.DownloadCount) {
+					PackageSearchMetadata = m
+				});
 		}
 
-		public static async Task<IEnumerable<string>> IdStartsWithAsync(
+		public static async Task<IEnumerable<string>> IdStartsWithAsync (
 			this SourceRepository sourceRepository, string packageIdPrefix, bool includePrerelease, CancellationToken cancellationToken)
 		{
-			var autoCompleteResource = await sourceRepository.GetResourceAsync<AutoCompleteResource>(cancellationToken);
-			IEnumerable<string> packageIds = null;
-			if (autoCompleteResource != null) {
-				packageIds = await autoCompleteResource.IdStartsWith(
-					packageIdPrefix,
-					includePrerelease: includePrerelease,
-					log: Logging.NullLogger.Instance,
-					token: cancellationToken);
-			}
+			var autoCompleteResource = await sourceRepository.GetResourceAsync<AutoCompleteResource> (cancellationToken);
+			var packageIds = await autoCompleteResource?.IdStartsWith (
+				packageIdPrefix,
+				includePrerelease: includePrerelease,
+				log: Common.NullLogger.Instance,
+				token: cancellationToken);
 
-			return packageIds ?? Enumerable.Empty<string>();
+			return packageIds ?? Enumerable.Empty<string> ();
 		}
 
-		public static async Task<IEnumerable<NuGetVersion>> VersionStartsWithAsync(
+		public static async Task<IEnumerable<NuGetVersion>> VersionStartsWithAsync (
 			this SourceRepository sourceRepository, string packageId, string versionPrefix, bool includePrerelease, CancellationToken cancellationToken)
 		{
-			var autoCompleteResource = await sourceRepository.GetResourceAsync<AutoCompleteResource>(cancellationToken);
-			IEnumerable<NuGetVersion> versions = null;
-			if (autoCompleteResource != null) {
-				versions = await autoCompleteResource.VersionStartsWith(
-					packageId,
-					versionPrefix,
-					includePrerelease: includePrerelease,
-					log: Logging.NullLogger.Instance,
-					token: cancellationToken);
-			}
+			var autoCompleteResource = await sourceRepository.GetResourceAsync<AutoCompleteResource> (cancellationToken);
+			using (var sourceCacheContext = new SourceCacheContext ()) {
+				var versions = await autoCompleteResource?.VersionStartsWith (
+				packageId,
+				versionPrefix,
+				includePrerelease: includePrerelease,
+				sourceCacheContext: sourceCacheContext,
+				log: Common.NullLogger.Instance,
+				token: cancellationToken);
 
-			return versions ?? Enumerable.Empty<NuGetVersion>();
+				return versions ?? Enumerable.Empty<NuGetVersion> ();
+			}
 		}
 	}
 }

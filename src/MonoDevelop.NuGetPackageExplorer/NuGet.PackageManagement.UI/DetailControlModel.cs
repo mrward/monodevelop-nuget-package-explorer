@@ -204,7 +204,7 @@ namespace NuGet.PackageManagement.UI
 		protected abstract void CreateVersions();
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
-		protected List<DisplayVersion> _versions;
+		protected List<DisplayVersion> _versions = new List<DisplayVersion> ();
 
 		// The list of versions that can be installed
 		public List<DisplayVersion> Versions
