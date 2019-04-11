@@ -18,4 +18,5 @@ mono ./src/packages/ILRepack.2.0.16/tools/ILRepack.exe \
   src/packages/NuGet.ProjectModel.4.8.0/lib/net46/NuGet.ProjectModel.dll \
   src/packages/NuGet.Protocol.4.8.0/lib/net46/NuGet.Protocol.dll \
   src/packages/NuGet.Resolver.4.8.0/lib/net46/NuGet.Resolver.dll \
-  src/packages/NuGet.Versioning.4.8.0/lib/net46/NuGet.Versioning.dll
+  src/packages/NuGet.Versioning.4.8.0/lib/net46/NuGet.Versioning.dll \
+  src/packages/Lucene.Net.3.0.3/lib/NET40/Lucene.Net.dll
