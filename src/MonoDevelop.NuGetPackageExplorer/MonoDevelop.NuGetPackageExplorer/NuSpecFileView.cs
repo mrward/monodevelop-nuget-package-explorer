@@ -25,16 +25,13 @@
 // THE SOFTWARE.
 //
 
-using System;
 using System.Xml.Linq;
 using MonoDevelop.Components;
-using MonoDevelop.Core;
 using MonoDevelop.Ide.Editor;
-using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
-	public class NuSpecFileView : ViewContent
+	public class NuSpecFileView
 	{
 		TextEditor textEditor;
 
@@ -45,14 +42,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 			textEditor.IsReadOnly = true;
 		}
 
-		public override Control Control {
+		public Control Control {
 			get { return textEditor; }
-		}
-
-		public override string TabPageLabel {
-			get {
-				return GettextCatalog.GetString ("NuSpec");
-			}
 		}
 
 		public void ShowXml (XDocument document)

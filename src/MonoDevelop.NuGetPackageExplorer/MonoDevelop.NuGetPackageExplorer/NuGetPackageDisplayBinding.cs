@@ -25,36 +25,72 @@
 // THE SOFTWARE.
 //
 
-using System;
+using System.Threading.Tasks;
+using MonoDevelop.Components;
 using MonoDevelop.Core;
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Projects;
+using MonoDevelop.Ide.Gui.Documents;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
-	public class NuGetPackageDisplayBinding : IViewDisplayBinding
+	[ExportFileDocumentController (
+		Id = "NuGetPackageExplorer",
+		Name = "NuGet Package Explorer",
+		FileExtension = ".nupkg",
+		CanUseAsDefault = true,
+		InsertBefore = "DefaultDisplayBinding")]
+	public class NuGetPackageDisplayBinding : FileDocumentController
 	{
-		public bool CanUseAsDefault {
+		NuGetPackageView packageView;
+		FileDescriptor fileDescriptor;
+
+		public NuGetPackageDisplayBinding ()
+		{
+		}
+
+		public NuGetPackageDisplayBinding (NuGetPackageView packageView)
+		{
+			this.packageView = packageView;
+		}
+
+		protected override bool ControllerIsViewOnly {
 			get { return true; }
 		}
 
-		public string Name {
-			get {
-				return GettextCatalog.GetString ("NuGet Package Explorer");
+		protected override async Task OnInitialize (ModelDescriptor modelDescriptor, Properties status)
+		{
+			await base.OnInitialize (modelDescriptor, status);
+			fileDescriptor = (FileDescriptor)modelDescriptor;
+		}
+
+		protected override async Task<DocumentView> OnInitializeView ()
+		{
+			var container = new DocumentViewContainer ();
+			container.SupportedModes = DocumentViewContainerMode.Tabs;
+
+			if (packageView == null) {
+				packageView = new NuGetPackageView ();
+				await packageView.Load (fileDescriptor.FilePath);
 			}
+
+			DocumentTitle = packageView.ContentName;
+
+			var control = new XwtControl (packageView);
+			AddView (container, control, GettextCatalog.GetString ("Package"));
+			AddView (container, packageView.NuSpecFileView.Control, GettextCatalog.GetString ("NuSpec"));
+
+			return container;
 		}
 
-		public bool CanHandle (FilePath fileName, string mimeType, Project ownerProject)
+		static DocumentViewContent AddView (
+			DocumentViewContainer container,
+			Control control,
+			string title)
 		{
-			if (fileName.IsNull)
-				return false;
+			var documentView = new DocumentViewContent (() => control);
+			documentView.Title = title;
+			container.Views.Add (documentView);
 
-			return fileName.HasExtension (".nupkg");
-		}
-
-		public ViewContent CreateContent (FilePath fileName, string mimeType, Project ownerProject)
-		{
-			return new NuGetPackageView ();
+			return documentView;
 		}
 	}
 }

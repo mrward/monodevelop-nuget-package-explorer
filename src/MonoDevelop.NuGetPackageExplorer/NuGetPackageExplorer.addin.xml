@@ -5,13 +5,6 @@
 		<Import file="ICSharpCode.SharpZipLib.dll" />
 	</Runtime>
 
-	<Extension path="/MonoDevelop/Ide/DisplayBindings">
-		<DisplayBinding
-			id="NuGetPackageExplorer"
-			class="MonoDevelop.NuGetPackageExplorer.NuGetPackageDisplayBinding"
-			insertbefore="DefaultDisplayBinding" />
-	</Extension>
-	
 	<Extension path="/MonoDevelop/Ide/FileFilters">
 		<FileFilter
 			id="NuGetPackageFiles"

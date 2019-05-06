@@ -32,7 +32,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui;
 using MonoDevelop.PackageManagement;
 using NuGet.Common;
 using NuGet.Configuration;
@@ -44,32 +43,36 @@ using Xwt;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
-	public class NuGetPackageView : AbstractXwtViewContent
+	public class NuGetPackageView : Widget
 	{
 		PackageReaderBase reader;
 		HPaned pane;
 		NuGetPackageMetadataView packageMetadataView;
 		NuGetPackageContentsView packageContentsTreeView;
-		NuSpecFileView nuspecFileView;
 		CancellationTokenSource tokenSource;
 		string packageExtractTempDirectory;
 
 		public NuGetPackageView ()
+			: this (new NuSpecFileView ())
+		{
+		}
+
+		public NuGetPackageView (NuSpecFileView nuspecFileView)
 		{
 			BuildView ();
-			nuspecFileView = new NuSpecFileView ();
+			NuSpecFileView = nuspecFileView;
 		}
 
-		public override Widget Widget {
-			get { return pane; }
-		}
+		public NuSpecFileView NuSpecFileView { get; }
 
-		public override Task Load (FileOpenInformation fileOpenInformation)
+		public string ContentName { get; private set; }
+
+		public Task Load (FilePath fileName)
 		{
-			ContentName = fileOpenInformation.FileName;
+			ContentName = fileName.FileName;
 
 			return Task.Run (() => {
-				var stream = File.OpenRead (fileOpenInformation.FileName);
+				var stream = File.OpenRead (fileName);
 				reader = new PackageArchiveReader (stream, leaveStreamOpen: true);
 				var nuspecReader = new NuspecReader (reader.GetNuspec ());
 
@@ -83,28 +86,14 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			packageMetadataView.ShowMetadata (nuspecReader);
 			packageContentsTreeView.ShowContents (reader);
-			nuspecFileView.ShowXml (nuspecReader.Xml);
+			NuSpecFileView.ShowXml (nuspecReader.Xml);
 		}
 
-		public override string TabPageLabel {
-			get {
-				return GettextCatalog.GetString ("Package");
-			}
-		}
-
-		protected override void OnWorkbenchWindowChanged ()
+		protected override void Dispose (bool disposing)
 		{
-			if (WorkbenchWindow != null) {
-				WorkbenchWindow.AttachViewContent (nuspecFileView);
-			}
-		}
+			if (!disposing)
+				return;
 
-		public override bool IsViewOnly {
-			get { return true; }
-		}
-
-		public override void Dispose ()
-		{
 			if (tokenSource != null) {
 				tokenSource.Cancel ();
 				tokenSource = null;
@@ -134,6 +123,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageContentsTreeView.OnOpenFile = OnOpenPackageFile;
 			bottomScrollView.Content = packageContentsTreeView;
 			pane.Panel2.Content = bottomScrollView;
+
+			Content = pane;
 		}
 
 		internal async Task DownloadPackage (

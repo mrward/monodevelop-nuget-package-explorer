@@ -113,9 +113,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 			foreach (PackageSearchResultViewModel package in packages) {
 				package.Parent = null;
+
 				var view = new NuGetPackageView ();
-				view.DownloadPackage (package, repositories, settings);
-				IdeApp.Workbench.OpenDocument (view, true);
+				view.DownloadPackage (package, repositories, settings).Ignore ();
+
+				var controller = new NuGetPackageDisplayBinding (view);
+				IdeApp.Workbench.OpenDocument (controller, true).Ignore ();
 			}
 		}
 	}

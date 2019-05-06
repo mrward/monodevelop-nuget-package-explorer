@@ -35,8 +35,8 @@ using Mono.Addins;
 [assembly:AddinName ("NuGet Package Explorer")]
 [assembly:AddinDescription ("Open and view NuGet packages (.nupkg). Adds support for viewing SemVer 2.0 NuGet packages.")]
 
-[assembly:AddinDependency ("Core", "8.0")]
-[assembly:AddinDependency ("Ide", "8.0")]
-[assembly:AddinDependency ("PackageManagement", "8.0")]
-[assembly:AddinDependency ("DotNetCore", "8.0")]
+[assembly:AddinDependency ("Core", "8.1")]
+[assembly:AddinDependency ("Ide", "8.1")]
+[assembly:AddinDependency ("PackageManagement", "8.1")]
+[assembly:AddinDependency ("DotNetCore", "8.1")]
 
