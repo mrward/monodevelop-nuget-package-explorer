@@ -114,7 +114,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageAuthors = AddMetadata (GettextCatalog.GetString ("Authors"));
 			packageOwners = AddMetadata (GettextCatalog.GetString ("Owners"));
 			packageTags = AddMetadata (GettextCatalog.GetString ("Tags"));
-			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Types"));
+			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Type"));
 			packageLanguage = AddMetadata (GettextCatalog.GetString ("Language"));
 			packageCopyright = AddMetadata (GettextCatalog.GetString ("Copyright"));
 			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
@@ -423,6 +423,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 			if (types?.Any () == true) {
 				var items = types.Select (type => GetPackageTypeDisplayText (type));
 				packageTypes.Text = string.Join (", ", items);
+			} else {
+				packageTypes.Parent.Visible = false;
 			}
 		}
 
