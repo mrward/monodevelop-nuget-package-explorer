@@ -50,6 +50,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		Label packageAuthors;
 		Label packageOwners;
 		Label packageTags;
+		Label packageTypes;
 		Label packageLanguage;
 		Label packageCopyright;
 		Label packageRequireLicenseAcceptance;
@@ -107,6 +108,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageAuthors = AddMetadata (GettextCatalog.GetString ("Authors"));
 			packageOwners = AddMetadata (GettextCatalog.GetString ("Owners"));
 			packageTags = AddMetadata (GettextCatalog.GetString ("Tags"));
+			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Types"));
 			packageLanguage = AddMetadata (GettextCatalog.GetString ("Language"));
 			packageCopyright = AddMetadata (GettextCatalog.GetString ("Copyright"));
 			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
@@ -216,9 +218,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageReleaseNotes.Text = reader.GetMetadataValue ("releaseNotes");
 			packageReleaseNotesHBox.Visible = !String.IsNullOrEmpty (packageReleaseNotes.Text);
 
+			//var repositoryMetadata = reader.GetRepositoryMetadata ();
+
 			ShowDependencies (reader);
 			ShowFrameworkReferences (reader);
 			ShowFilteredAssemblyReferences (reader);
+			ShowPackageTypes (reader);
 
 			NuGetVersion version = reader.GetMinClientVersion ();
 			if (version != null)
@@ -376,6 +381,24 @@ namespace MonoDevelop.NuGetPackageExplorer
 			foreach (FrameworkSpecificGroup frameworkSpecificGroup in referenceGroups) {
 				ShowFrameworkSpecificGroup (frameworkSpecificGroup, packageReferencesVBox);
 			}
+		}
+
+		void ShowPackageTypes (NuspecReader reader)
+		{
+			IReadOnlyList<PackageType> types = reader.GetPackageTypes ();
+			if (types?.Any () == true) {
+				var items = types.Select (type => GetPackageTypeDisplayText (type));
+				packageTypes.Text = string.Join (", ", items);
+			}
+		}
+
+		static string GetPackageTypeDisplayText (PackageType packageType)
+		{
+			if (packageType.Version == PackageType.EmptyVersion) {
+				return packageType.Name;
+			}
+
+			return string.Format ("{0} {1}", packageType.Name, packageType.Version);
 		}
 
 		protected override void Dispose (bool disposing)
