@@ -198,7 +198,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		public void ShowMetadata (NuspecReader reader)
 		{
 			packageId.Text = reader.GetId ();
-			packageVersion.Text = reader.GetVersion ().ToNormalizedString ();
+			packageVersion.Text = GetPackageVersionDisplayText (reader.GetVersion ());
 			packageLanguage.Text = reader.GetLanguage ();
 			packageCopyright.Text = reader.GetMetadataValue ("copyright");
 			packageTitle.Text = reader.GetMetadataValue ("title");
@@ -228,7 +228,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		internal void ShowMetadata (PackageSearchResultViewModel package)
 		{
 			packageId.Text = package.Id;
-			packageVersion.Text = package.Version.ToNormalizedString ();
+			packageVersion.Text = GetPackageVersionDisplayText (package.Version);
 			packageTitle.Text = package.Title;
 			packageAuthors.Text = package.Author;
 			packageOwners.Text = package.PackageMetadata?.Owners ?? string.Empty;
@@ -244,6 +244,15 @@ namespace MonoDevelop.NuGetPackageExplorer
 			if (package.PackageMetadata?.HasDependencies == true) {
 				ShowDependencies (package.PackageMetadata.DependencySets.Select (d => d.DependencyGroup));
 			}
+		}
+
+		static string GetPackageVersionDisplayText (NuGetVersion version)
+		{
+			if (string.IsNullOrEmpty (version.OriginalVersion)) {
+				return version.ToNormalizedString ();
+			}
+
+			return version.OriginalVersion;
 		}
 
 		static void UpdateLinkLabel (LinkLabel label, NuspecReader reader, string metadataName)
