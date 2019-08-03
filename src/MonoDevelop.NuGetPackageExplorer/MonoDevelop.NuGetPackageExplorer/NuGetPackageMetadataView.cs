@@ -69,6 +69,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 		VBox packageFrameworkReferencesVBox;
 		HBox packageReferencesLabelHBox;
 		VBox packageReferencesVBox;
+		HBox packageRepositoryMetadataLabelHBox;
+		VBox packageRepositoryMetadataVBox;
+		Label packageRepositoryType;
+		LinkLabel packageRepositoryUrl;
+		Label packageRepositoryBranch;
+		Label packageRepositoryCommit;
 		List<LinkLabel> dependencyLabels = new List<LinkLabel> ();
 
 		public NuGetPackageMetadataView ()
@@ -142,6 +148,20 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageReleaseNotes.Wrap = WrapMode.Word;
 			packageReleaseNotesHBox.PackStart (packageReleaseNotes, true);
 
+			// Repository metadata
+			packageRepositoryMetadataLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("Repository"));
+			packageRepositoryMetadataLabelHBox.Visible = false;
+
+			packageRepositoryMetadataVBox = new VBox ();
+			packageRepositoryMetadataVBox.MarginLeft = 20;
+			packageRepositoryMetadataVBox.Visible = false;
+			mainVBox.PackStart (packageRepositoryMetadataVBox);
+
+			packageRepositoryType = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Type"));
+			packageRepositoryUrl = AddMetadataUrl (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Url"));
+			packageRepositoryBranch = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Branch"));
+			packageRepositoryCommit = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Commit"));
+
 			// Dependencies.
 			AddMetadataHBox (GettextCatalog.GetString ("Dependencies"));
 			packageDependenciesVBox = new VBox ();
@@ -165,10 +185,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 			return string.Format ("<b>{0}</b>", text);
 		}
 
-		HBox AddMetadataHBox (string name)
+		HBox AddMetadataHBox (VBox parentVBox, string name)
 		{
 			var hbox = new HBox ();
-			mainVBox.PackStart (hbox);
+			parentVBox.PackStart (hbox);
 
 			var label = new Label ();
 			label.Markup = BoldText (name);
@@ -177,9 +197,14 @@ namespace MonoDevelop.NuGetPackageExplorer
 			return hbox;
 		}
 
-		Label AddMetadata (string name)
+		HBox AddMetadataHBox (string name)
 		{
-			HBox hbox = AddMetadataHBox (name);
+			return AddMetadataHBox (mainVBox, name);
+		}
+
+		Label AddMetadata (VBox parentVBox, string name)
+		{
+			HBox hbox = AddMetadataHBox (parentVBox, name);
 
 			var metadataValueLabel = new Label ();
 			hbox.PackStart (metadataValueLabel);
@@ -187,9 +212,19 @@ namespace MonoDevelop.NuGetPackageExplorer
 			return metadataValueLabel;
 		}
 
+		Label AddMetadata (string name)
+		{
+			return AddMetadata (mainVBox, name);
+		}
+
 		LinkLabel AddMetadataUrl (string name)
 		{
-			HBox hbox = AddMetadataHBox (name);
+			return AddMetadataUrl (mainVBox, name);
+		}
+
+		LinkLabel AddMetadataUrl (VBox parentVBox, string name)
+		{
+			HBox hbox = AddMetadataHBox (parentVBox, name);
 
 			var metadataValueLabel = new LinkLabel ();
 			hbox.PackStart (metadataValueLabel);
@@ -218,11 +253,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageReleaseNotes.Text = reader.GetMetadataValue ("releaseNotes");
 			packageReleaseNotesHBox.Visible = !String.IsNullOrEmpty (packageReleaseNotes.Text);
 
-			//var repositoryMetadata = reader.GetRepositoryMetadata ();
-
 			ShowDependencies (reader);
 			ShowFrameworkReferences (reader);
 			ShowFilteredAssemblyReferences (reader);
+			ShowRepositoryMetadata (reader);
 			ShowPackageTypes (reader);
 
 			NuGetVersion version = reader.GetMinClientVersion ();
@@ -399,6 +433,29 @@ namespace MonoDevelop.NuGetPackageExplorer
 			}
 
 			return string.Format ("{0} {1}", packageType.Name, packageType.Version);
+		}
+
+		void ShowRepositoryMetadata (NuspecReader reader)
+		{
+			var repositoryMetadata = reader.GetRepositoryMetadata ();
+			if (string.IsNullOrEmpty (repositoryMetadata?.Type) && string.IsNullOrEmpty (repositoryMetadata?.Url)) {
+				return;
+			}
+
+			packageRepositoryMetadataLabelHBox.Visible = true;
+			packageRepositoryMetadataVBox.Visible = true;
+
+			packageRepositoryType.Text = repositoryMetadata.Type;
+			packageRepositoryType.Parent.Visible = !string.IsNullOrEmpty (repositoryMetadata.Type);
+
+			packageRepositoryBranch.Text = repositoryMetadata.Branch;
+			packageRepositoryBranch.Parent.Visible = !string.IsNullOrEmpty (repositoryMetadata.Branch);
+
+			packageRepositoryCommit.Text = repositoryMetadata.Commit;
+			packageRepositoryCommit.Parent.Visible = !string.IsNullOrEmpty (repositoryMetadata.Commit);
+
+			UpdateLinkLabel (packageRepositoryUrl, repositoryMetadata.Url);
+			packageRepositoryUrl.Visible = !string.IsNullOrEmpty (repositoryMetadata.Url);
 		}
 
 		protected override void Dispose (bool disposing)
