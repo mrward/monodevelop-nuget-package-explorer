@@ -114,6 +114,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageMetadataView = new NuGetPackageMetadataView ();
 			packageMetadataView.OnCancelDownload = OnCancelDownload;
 			packageMetadataView.OnOpenPackageDependency = OnOpenPackageDependency;
+			packageMetadataView.OnOpenFile = OnOpenPackageFile;
 			topScrollView.Content = packageMetadataView;
 			pane.Panel1.Content = topScrollView;
 

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Core;
 using MonoDevelop.PackageManagement;
+using NuGet.PackageManagement.UI;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
@@ -59,6 +60,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 		LinkLabel packageLicenseUrl;
 		LinkLabel packageProjectUrl;
 		LinkLabel packageIconUrl;
+		HBox packageLicenseMetadataHBox;
+		VBox packageLicenseMetadataVBox;
 		Label packageSummary;
 		HBox packageSummaryHBox;
 		Label packageDescription;
@@ -76,6 +79,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		Label packageRepositoryBranch;
 		Label packageRepositoryCommit;
 		List<LinkLabel> dependencyLabels = new List<LinkLabel> ();
+		List<LinkLabel> licenseFileLabels = new List<LinkLabel> ();
 
 		public NuGetPackageMetadataView ()
 		{
@@ -84,6 +88,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 		public Action OnCancelDownload = () => { };
 		public Action<PackageDependency> OnOpenPackageDependency = dependency => { };
+		public Action<string> OnOpenFile = packageFile => { };
 
 		void Build ()
 		{
@@ -117,12 +122,23 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Type"));
 			packageLanguage = AddMetadata (GettextCatalog.GetString ("Language"));
 			packageCopyright = AddMetadata (GettextCatalog.GetString ("Copyright"));
-			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
 			packageProjectUrl = AddMetadataUrl (GettextCatalog.GetString ("Project Page"));
 			packageIconUrl = AddMetadataUrl (GettextCatalog.GetString ("Icon"));
 			packageRequireLicenseAcceptance = AddMetadata (GettextCatalog.GetString ("Require License Acceptance"));
 			packageDevelopmentDependency = AddMetadata (GettextCatalog.GetString ("Development Dependency"));
 			packageMinClientVersion = AddMetadata (GettextCatalog.GetString ("Minimum Client Version"));
+
+			// License.
+			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
+
+			packageLicenseMetadataHBox = AddMetadataHBox (GettextCatalog.GetString ("License"));
+			packageLicenseMetadataHBox.Visible = false;
+
+			packageLicenseMetadataVBox = new VBox ();
+			packageLicenseMetadataVBox.Visible = false;
+			packageLicenseMetadataVBox.MarginLeft = 20;
+
+			mainVBox.PackStart (packageLicenseMetadataVBox);
 
 			// Summary.
 			AddMetadataHBox (GettextCatalog.GetString ("Summary"));
@@ -244,7 +260,6 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageOwners.Text = reader.GetMetadataValue ("owners");
 			packageRequireLicenseAcceptance.Text = reader.GetMetadataValue ("requireLicenseAcceptance");
 			packageDevelopmentDependency.Text = reader.GetDevelopmentDependency ().ToString ();
-			UpdateLinkLabel (packageLicenseUrl, reader, "licenseUrl");
 			UpdateLinkLabel (packageProjectUrl, reader, "projectUrl");
 			UpdateLinkLabel (packageIconUrl, reader, "iconUrl");
 			packageSummary.Text = reader.GetMetadataValue ("summary");
@@ -258,6 +273,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			ShowFilteredAssemblyReferences (reader);
 			ShowRepositoryMetadata (reader);
 			ShowPackageTypes (reader);
+			ShowLicense (reader);
 
 			NuGetVersion version = reader.GetMinClientVersion ();
 			if (version != null)
@@ -468,6 +484,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 				label.NavigateToUrl -= OpenDependencyPackage;
 			}
 
+			foreach (LinkLabel label in licenseFileLabels) {
+				label.NavigateToUrl -= OpenLicenseFile;
+			}
+
 			base.Dispose (disposing);
 		}
 
@@ -493,6 +513,61 @@ namespace MonoDevelop.NuGetPackageExplorer
 				var label = (LinkLabel)sender;
 				var dependency = (PackageDependency)label.Tag;
 				OnOpenPackageDependency (dependency);
+			} finally {
+				e.SetHandled ();
+			}
+		}
+
+		void ShowLicense (NuspecReader reader)
+		{
+			var licenseMetadata = reader.GetLicenseMetadata ();
+			if (licenseMetadata == null) {
+				UpdateLinkLabel (packageLicenseUrl, reader, "licenseUrl");
+				return;
+			}
+
+			packageLicenseUrl.Parent.Visible = false;
+			packageLicenseMetadataHBox.Visible = true;
+
+			IReadOnlyList<IText> textLinks = PackageLicenseUtilities.GenerateLicenseLinks (licenseMetadata, reader.GetLicenseUrl (), null);
+
+			Box parent = packageLicenseMetadataVBox;
+			if (textLinks.Count == 1) {
+				parent = packageLicenseMetadataHBox;
+			} else {
+				packageLicenseMetadataVBox.Visible = true;
+			}
+
+			foreach (IText textLink in textLinks) {
+				if (textLink is LicenseText licenseText) {
+					var label = new LinkLabel (licenseText.Text);
+					label.TextAlignment = Alignment.Start;
+					label.Uri = licenseText.Link;
+
+					parent.PackStart (label);
+				} else if (textLink is LicenseFileText licenseFileText) {
+					var label = new LinkLabel (licenseFileText.Text);
+					label.TextAlignment = Alignment.Start;
+
+					label.NavigateToUrl += OpenLicenseFile;
+					label.Tag = licenseFileText;
+					parent.PackStart (label);
+
+					licenseFileLabels.Add (label);
+				} else {
+					var label = new Label (textLink.Text);
+					label.TextAlignment = Alignment.Start;
+					parent.PackStart (label);
+				}
+			}
+		}
+
+		void OpenLicenseFile (object sender, NavigateToUrlEventArgs e)
+		{
+			try {
+				var label = (LinkLabel)sender;
+				var licenseFileText = (LicenseFileText)label.Tag;
+				OnOpenFile (licenseFileText.LicenseFileLocation);
 			} finally {
 				e.SetHandled ();
 			}
