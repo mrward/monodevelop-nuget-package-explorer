@@ -26,6 +26,7 @@
 
 using System;
 using System.Xml.Linq;
+using NuGet.Common;
 using NuGet.PackageManagement;
 using NuGet.Packaging;
 using NuGet.ProjectManagement;
@@ -66,6 +67,14 @@ namespace MonoDevelop.PackageManagement
 		public FileConflictAction ResolveFileConflict (string message)
 		{
 			return FileConflictAction.IgnoreAll;
+		}
+
+		public void Log (ILogMessage message)
+		{
+		}
+
+		public void ReportError (ILogMessage message)
+		{
 		}
 	}
 }
