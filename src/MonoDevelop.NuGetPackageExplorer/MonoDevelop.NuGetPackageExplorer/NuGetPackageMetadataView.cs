@@ -375,7 +375,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 		void ShowFrameworkReferences (NuspecReader reader)
 		{
-			var frameworkReferenceGroups = reader.GetFrameworkReferenceGroups ().ToArray ();
+			var frameworkReferenceGroups = reader.GetFrameworkAssemblyGroups ().ToArray ();
 			if (!frameworkReferenceGroups.Any ())
 				return;
 
