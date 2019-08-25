@@ -121,11 +121,6 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Type"));
 			packageLanguage = AddMetadata (GettextCatalog.GetString ("Language"));
 			packageCopyright = AddMetadata (GettextCatalog.GetString ("Copyright"));
-			packageProjectUrl = AddMetadataUrl (GettextCatalog.GetString ("Project Page"));
-			packageIconUrl = AddMetadataUrl (GettextCatalog.GetString ("Icon"));
-			packageRequireLicenseAcceptance = AddMetadata (GettextCatalog.GetString ("Require License Acceptance"));
-			packageDevelopmentDependency = AddMetadata (GettextCatalog.GetString ("Development Dependency"));
-			packageMinClientVersion = AddMetadata (GettextCatalog.GetString ("Minimum Client Version"));
 
 			// License.
 			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
@@ -135,6 +130,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 			var label = (Label)packageLicenseMetadataLabelHBox.Children.First ();
 			label.MarginRight = 5;
 			packageLicenseMetadataLabelHBox.Visible = false;
+
+			packageProjectUrl = AddMetadataUrl (GettextCatalog.GetString ("Project Page"));
+			packageIconUrl = AddMetadataUrl (GettextCatalog.GetString ("Icon"));
+			packageRequireLicenseAcceptance = AddMetadata (GettextCatalog.GetString ("Require License Acceptance"));
+			packageDevelopmentDependency = AddMetadata (GettextCatalog.GetString ("Development Dependency"));
+			packageMinClientVersion = AddMetadata (GettextCatalog.GetString ("Minimum Client Version"));
 
 			// Summary.
 			AddMetadataHBox (GettextCatalog.GetString ("Summary"));
