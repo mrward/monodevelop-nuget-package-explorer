@@ -60,8 +60,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		LinkLabel packageLicenseUrl;
 		LinkLabel packageProjectUrl;
 		LinkLabel packageIconUrl;
-		HBox packageLicenseMetadataHBox;
-		VBox packageLicenseMetadataVBox;
+		HBox packageLicenseMetadataLabelHBox;
 		Label packageSummary;
 		HBox packageSummaryHBox;
 		Label packageDescription;
@@ -131,14 +130,11 @@ namespace MonoDevelop.NuGetPackageExplorer
 			// License.
 			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
 
-			packageLicenseMetadataHBox = AddMetadataHBox (GettextCatalog.GetString ("License"));
-			packageLicenseMetadataHBox.Visible = false;
-
-			packageLicenseMetadataVBox = new VBox ();
-			packageLicenseMetadataVBox.Visible = false;
-			packageLicenseMetadataVBox.MarginLeft = 20;
-
-			mainVBox.PackStart (packageLicenseMetadataVBox);
+			packageLicenseMetadataLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("License"));
+			packageLicenseMetadataLabelHBox.Spacing = 0;
+			var label = (Label)packageLicenseMetadataLabelHBox.Children.First ();
+			label.MarginRight = 5;
+			packageLicenseMetadataLabelHBox.Visible = false;
 
 			// Summary.
 			AddMetadataHBox (GettextCatalog.GetString ("Summary"));
@@ -527,16 +523,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 			}
 
 			packageLicenseUrl.Parent.Visible = false;
-			packageLicenseMetadataHBox.Visible = true;
+			packageLicenseMetadataLabelHBox.Visible = true;
+			Box parent = packageLicenseMetadataLabelHBox;
 
 			IReadOnlyList<IText> textLinks = PackageLicenseUtilities.GenerateLicenseLinks (licenseMetadata, reader.GetLicenseUrl (), null);
-
-			Box parent = packageLicenseMetadataVBox;
-			if (textLinks.Count == 1) {
-				parent = packageLicenseMetadataHBox;
-			} else {
-				packageLicenseMetadataVBox.Visible = true;
-			}
 
 			foreach (IText textLink in textLinks) {
 				if (textLink is LicenseText licenseText) {
@@ -544,20 +534,20 @@ namespace MonoDevelop.NuGetPackageExplorer
 					label.TextAlignment = Alignment.Start;
 					label.Uri = licenseText.Link;
 
-					parent.PackStart (label);
+					parent.PackStart (label, false, false);
 				} else if (textLink is LicenseFileText licenseFileText) {
 					var label = new LinkLabel (licenseFileText.Text);
 					label.TextAlignment = Alignment.Start;
 
 					label.NavigateToUrl += OpenLicenseFile;
 					label.Tag = licenseFileText;
-					parent.PackStart (label);
+					parent.PackStart (label, false, false);
 
 					licenseFileLabels.Add (label);
 				} else {
 					var label = new Label (textLink.Text);
 					label.TextAlignment = Alignment.Start;
-					parent.PackStart (label);
+					parent.PackStart (label, false, false);
 				}
 			}
 		}
