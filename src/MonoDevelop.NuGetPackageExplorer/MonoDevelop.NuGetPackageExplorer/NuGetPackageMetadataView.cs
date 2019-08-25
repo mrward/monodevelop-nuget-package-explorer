@@ -61,6 +61,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		LinkLabel packageProjectUrl;
 		LinkLabel packageIconUrl;
 		HBox packageLicenseMetadataLabelHBox;
+		VBox packageLicenseMetadataWarningsVBox;
 		Label packageSummary;
 		HBox packageSummaryHBox;
 		Label packageDescription;
@@ -130,6 +131,10 @@ namespace MonoDevelop.NuGetPackageExplorer
 			var label = (Label)packageLicenseMetadataLabelHBox.Children.First ();
 			label.MarginRight = 5;
 			packageLicenseMetadataLabelHBox.Visible = false;
+
+			packageLicenseMetadataWarningsVBox = new VBox ();
+			packageLicenseMetadataWarningsVBox.Visible = false;
+			mainVBox.PackStart (packageLicenseMetadataWarningsVBox);
 
 			packageProjectUrl = AddMetadataUrl (GettextCatalog.GetString ("Project Page"));
 			packageIconUrl = AddMetadataUrl (GettextCatalog.GetString ("Icon"));
@@ -527,6 +532,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageLicenseMetadataLabelHBox.Visible = true;
 			Box parent = packageLicenseMetadataLabelHBox;
 
+			var warnings = new List<WarningText> ();
 			IReadOnlyList<IText> textLinks = PackageLicenseUtilities.GenerateLicenseLinks (licenseMetadata, reader.GetLicenseUrl (), null);
 
 			foreach (IText textLink in textLinks) {
@@ -545,10 +551,22 @@ namespace MonoDevelop.NuGetPackageExplorer
 					parent.PackStart (label, false, false);
 
 					licenseFileLabels.Add (label);
+				} else if (textLink is WarningText warning) {
+					warnings.Add (warning);
 				} else {
 					var label = new Label (textLink.Text);
 					label.TextAlignment = Alignment.Start;
 					parent.PackStart (label, false, false);
+				}
+			}
+
+			if (warnings.Any ()) {
+				packageLicenseMetadataWarningsVBox.Visible = true;
+				foreach (WarningText warning in warnings) {
+					var label = new Label (warning.Text);
+					label.TextAlignment = Alignment.Start;
+					label.Wrap = WrapMode.Word;
+					packageLicenseMetadataWarningsVBox.PackStart (label, false, false);
 				}
 			}
 		}
