@@ -27,12 +27,15 @@
 
 using System;
 using System.Linq;
-using NuGet.Packaging;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
 	public class NuGetPackageFilePath
 	{
+		static string[] KnownInternalFolders = new string[] {
+			"_rels", "package"
+		};
+
 		string file;
 		string[] parts;
 		string[] directories = new string[0];
@@ -88,7 +91,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			if (!HasFolder ())
 				return true;
 
-			return PackagingConstants.Folders.Known.Any (MatchesRootFolder);
+			return !KnownInternalFolders.Any (MatchesRootFolder);
 		}
 
 		bool MatchesRootFolder (string folder)
