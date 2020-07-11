@@ -47,7 +47,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		public static PackageDependencyNode GetSelectedNode ()
 		{
 			var solutionPad = IdeApp.Workbench.Pads?.SolutionPad?.Content as SolutionPad;
-			var treeView = solutionPad?.TreeView;
+			var treeView = solutionPad?.Controller;
 			var node = treeView?.GetSelectedNode ();
 			var dataItem = node?.DataItem;
 			if (dataItem != null && dataItem.GetType ().FullName == "MonoDevelop.DotNetCore.NodeBuilders.PackageDependencyNode") {
