@@ -24,8 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Ide;
 using Xwt;
 
 namespace MonoDevelop.PackageManagement
@@ -34,8 +32,10 @@ namespace MonoDevelop.PackageManagement
 	{
 		public static Command ShowWithParent (this Dialog dialog)
 		{
-			WindowFrame parent = Toolkit.CurrentEngine.WrapWindow (IdeApp.Workbench.RootWindow);
-			return dialog.Run (parent);
+			// MessageDialog.RootWindow is set to the native IdeApp.Workbench.Window.nativeWindow on startup.
+			// Cannot use IdeApp.Workbench.Window directly here since the MacEngine tries to cast the Window
+			// to an NSWindow bypassing the implicit operators.
+			return dialog.Run (MessageDialog.RootWindow);
 		}
 	}
 }
