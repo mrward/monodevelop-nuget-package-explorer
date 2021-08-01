@@ -103,6 +103,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 				reader.Dispose ();
 				reader = null;
 			}
+
+			NuSpecFileView.Dispose ();
 		}
 
 		void BuildView ()

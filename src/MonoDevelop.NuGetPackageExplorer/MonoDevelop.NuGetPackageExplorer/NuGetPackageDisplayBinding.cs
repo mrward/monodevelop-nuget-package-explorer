@@ -92,6 +92,15 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 			return documentView;
 		}
+
+		protected override void OnDispose ()
+		{
+			if (packageView != null) {
+				packageView.Dispose ();
+				packageView = null;
+			}
+			base.OnDispose ();
+		}
 	}
 }
 
