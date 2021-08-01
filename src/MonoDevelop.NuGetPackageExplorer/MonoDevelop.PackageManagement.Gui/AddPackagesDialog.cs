@@ -167,6 +167,7 @@ namespace MonoDevelop.PackageManagement
 			if (listView is NSTableView tableView)
 			{
 				tableView.UsesAlternatingRowBackgroundColors = true;
+				tableView.RowHeight = (nfloat)packageCellView.CellHeight;
 				packageCellView.ParentTableView = tableView;
 			}
 		}

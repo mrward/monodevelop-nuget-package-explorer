@@ -48,12 +48,19 @@ namespace MonoDevelop.PackageManagement
 				packageIdFontSize = 12;
 				packageDescriptionFontSize = 11;
 			}
+
+			var layout = new TextLayout ();
+			layout.Text = "W";
+			layout.Font = layout.Font.WithSize (packageDescriptionFontSize);
+			Size size = layout.GetSize ();
+			CellHeight = size.Height * linesDisplayedCount + packageDescriptionPaddingHeight + packageDescriptionPadding.VerticalSpacing;
 		}
 
 		public IDataField<PackageSearchResultViewModel> PackageField { get; set; }
 		public IDataField<Image> ImageField { get; set; }
 
 		public double CellWidth { get; set; }
+		public double CellHeight { get; }
 
 		public NSTableView ParentTableView { get; set; }
 
