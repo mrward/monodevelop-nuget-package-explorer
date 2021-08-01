@@ -138,7 +138,7 @@ namespace MonoDevelop.PackageManagement
 			loadingSpinnerHBox.PackStart (loadingSpinner);
 
 			loadingSpinnerLabel = new Label ();
-			loadingSpinnerLabel.Text = Catalog.GetString ("Loading package list...");
+			loadingSpinnerLabel.Text = Catalog.GetString ("Loading package list…");
 			loadingSpinnerHBox.PackEnd (loadingSpinnerLabel);
 
 			loadingSpinnerFrame = new FrameBox ();

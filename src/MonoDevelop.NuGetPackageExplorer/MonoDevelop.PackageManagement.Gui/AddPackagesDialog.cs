@@ -44,17 +44,16 @@ namespace MonoDevelop.PackageManagement
 	{
 		AllPackagesViewModel viewModel;
 		List<SourceRepositoryViewModel> packageSources;
-		DataField<bool> packageHasBackgroundColorField = new DataField<bool> ();
 		DataField<PackageSearchResultViewModel> packageViewModelField = new DataField<PackageSearchResultViewModel> ();
 		DataField<Image> packageImageField = new DataField<Image> ();
-		DataField<double> packageCheckBoxAlphaField = new DataField<double> ();
-		const double packageCheckBoxSemiTransarentAlpha = 0.6;
+		DataField<bool> packageCheckBoxField = new DataField<bool> ();
 		ListStore packageStore;
 		PackageCellView packageCellView;
+		CheckBoxCellView packageCheckView;
 		TimeSpan searchDelayTimeSpan = TimeSpan.FromMilliseconds (500);
 		IDisposable searchTimer;
 		SourceRepositoryViewModel dummyPackageSourceRepresentingConfigureSettingsItem =
-			new SourceRepositoryViewModel (Catalog.GetString ("Configure Sources..."));
+			new SourceRepositoryViewModel (Catalog.GetString ("Configure Sources…"));
 		ImageLoader imageLoader = new ImageLoader ();
 		bool loadingMessageVisible;
 		bool ignorePackageVersionChanges;
@@ -144,29 +143,36 @@ namespace MonoDevelop.PackageManagement
 
 		void InitializeListView ()
 		{
-			packageStore = new ListStore (packageHasBackgroundColorField, packageCheckBoxAlphaField, packageImageField, packageViewModelField);
+			packageStore = new ListStore (packageImageField, packageViewModelField, packageCheckBoxField);
 			packagesListView.DataSource = packageStore;
 
-			AddPackageCellViewToListView ();
+			AddCellViewsToListView ();
 
 			packagesListView.SelectionChanged += PackagesListViewSelectionChanged;
 			packagesListView.RowActivated += PackagesListRowActivated;
 			packagesListView.VerticalScrollControl.ValueChanged += PackagesListViewScrollValueChanged;
 		}
 
-		void AddPackageCellViewToListView ()
+		void AddCellViewsToListView ()
 		{
+			packageCheckView = new CheckBoxCellView (packageCheckBoxField) { Editable = true };
+			packageCheckView.Toggled += PackageCheckCellViewPackageChecked;
+
+			// HACK: Xwt has no custom cell padding, so we need to add an empty label for spacing
+			var spaceText = new AccessibleSpacerCellView ();
+
 			packageCellView = new PackageCellView {
 				PackageField = packageViewModelField,
-				HasBackgroundColorField = packageHasBackgroundColorField,
-				CheckBoxAlphaField = packageCheckBoxAlphaField,
 				ImageField = packageImageField,
-				CellWidth = 535
+				CellWidth = 400
 			};
-			var textColumn = new ListViewColumn ("Package", packageCellView);
-			packagesListView.Columns.Add (textColumn);
 
-			packageCellView.PackageChecked += PackageCellViewPackageChecked;
+			var column = new ListViewColumn ("Package");
+			column.Expands = true;
+			column.Views.Add (spaceText);
+			column.Views.Add (packageCheckView);
+			column.Views.Add (packageCellView, true);
+			packagesListView.Columns.Add (column);
 		}
 
 		void ShowLoadingMessage ()
@@ -189,9 +195,9 @@ namespace MonoDevelop.PackageManagement
 		void UpdateSpinnerLabel ()
 		{
 			if (String.IsNullOrWhiteSpace (packageSearchEntry.Text)) {
-				loadingSpinnerLabel.Text = Catalog.GetString ("Loading package list...");
+				loadingSpinnerLabel.Text = Catalog.GetString ("Loading package list…");
 			} else {
-				loadingSpinnerLabel.Text = Catalog.GetString ("Searching packages...");
+				loadingSpinnerLabel.Text = Catalog.GetString ("Searching packages…");
 			}
 		}
 
@@ -410,7 +416,6 @@ namespace MonoDevelop.PackageManagement
 		{
 			packageStore.Clear ();
 			ResetPackagesListViewScroll ();
-			UpdatePackageListViewSelectionColor ();
 			ShowLoadingMessage ();
 			ShrinkImageCache ();
 			DisposePopulatePackageVersionsTimer ();
@@ -460,8 +465,6 @@ namespace MonoDevelop.PackageManagement
 		void AppendPackageToListView (PackageSearchResultViewModel packageViewModel)
 		{
 			int row = packageStore.AddRow ();
-			packageStore.SetValue (row, packageHasBackgroundColorField, IsOddRow (row));
-			packageStore.SetValue (row, packageCheckBoxAlphaField, GetPackageCheckBoxAlpha ());
 			packageStore.SetValue (row, packageViewModelField, packageViewModel);
 		}
 
@@ -475,14 +478,6 @@ namespace MonoDevelop.PackageManagement
 		bool IsOddRow (int row)
 		{
 			return (row % 2) == 0;
-		}
-
-		double GetPackageCheckBoxAlpha ()
-		{
-			if (PackagesCheckedCount == 0) {
-				return packageCheckBoxSemiTransarentAlpha;
-			}
-			return 1;
 		}
 
 		void ImageLoaded (object sender, ImageLoadedEventArgs e)
@@ -560,9 +555,17 @@ namespace MonoDevelop.PackageManagement
 			return false;
 		}
 
+		void PackageCheckCellViewPackageChecked (object sender, WidgetEventArgs e)
+		{
+			PackagesListRowActivated (sender, new ListViewRowEventArgs (packagesListView.CurrentEventRow));
+		}
+
 		void PackagesListRowActivated (object sender, ListViewRowEventArgs e)
 		{
-			AddPackagesButtonClicked (sender, e);
+			var packageViewModel = packageStore.GetValue (e.RowIndex, packageViewModelField);
+			packageViewModel.IsChecked = !packageViewModel.IsChecked;
+			packageStore.SetValue (e.RowIndex, packageCheckBoxField, packageViewModel.IsChecked);
+			UpdateAddPackagesButton ();
 		}
 
 		void PackageSearchEntryActivated (object sender, EventArgs e)
@@ -595,13 +598,6 @@ namespace MonoDevelop.PackageManagement
 			return (currentValue / (maxValue - pageSize)) > 0.7;
 		}
 
-		void PackageCellViewPackageChecked (object sender, PackageCellViewEventArgs e)
-		{
-			UpdateAddPackagesButton ();
-			UpdatePackageListViewSelectionColor ();
-			UpdatePackageListViewCheckBoxAlpha ();
-		}
-
 		void UpdateAddPackagesButton ()
 		{
 			string label = Catalog.GetPluralString ("Open Package", "Open Packages", GetPackagesCountForAddPackagesButtonLabel ());
@@ -615,22 +611,6 @@ namespace MonoDevelop.PackageManagement
 				return PackagesCheckedCount;
 
 			return 1;
-		}
-
-		void UpdatePackageListViewSelectionColor ()
-		{
-			packageCellView.UseStrongSelectionColor = (PackagesCheckedCount == 0);
-		}
-
-		void UpdatePackageListViewCheckBoxAlpha ()
-		{
-			if (PackagesCheckedCount > 1)
-				return;
-
-			double alpha = GetPackageCheckBoxAlpha ();
-			for (int row = 0; row < packageStore.RowCount; ++row) {
-				packageStore.SetValue (row, packageCheckBoxAlphaField, alpha);
-			}
 		}
 
 		bool OlderPackageInstalledThanPackageSelected ()

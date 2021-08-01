@@ -67,7 +67,6 @@
     <Compile Include="MonoDevelop.PackageManagement.Gui\AddPackagesDialog.UI.cs" />
     <Compile Include="MonoDevelop.PackageManagement.Gui\DialogExtensions.cs" />
     <Compile Include="MonoDevelop.PackageManagement.Gui\PackageCellView.cs" />
-    <Compile Include="MonoDevelop.PackageManagement.Gui\PackageCellViewCheckBox.cs" />
     <Compile Include="MonoDevelop.PackageManagement.Gui\PackageCellViewEventArgs.cs" />
     <Compile Include="MonoDevelop.PackageManagement.Gui\Styles.cs" />
     <Compile Include="MonoDevelop.PackageManagement\AllPackagesViewModel.cs" />
@@ -126,6 +125,7 @@
     <Compile Include="NuGet.PackageManagement.UI\Models\LicenseText.cs" />
     <Compile Include="NuGet.PackageManagement.UI\Models\LicenseFileText.cs" />
     <Compile Include="NuGet.PackageManagement.UI\Models\WarningText.cs" />
+    <Compile Include="MonoDevelop.PackageManagement.Gui\AccessibleSpacerView.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml" />
