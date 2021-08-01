@@ -35,6 +35,7 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Xwt;
+using Xwt.Drawing;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
@@ -104,7 +105,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 
 			downloadingHBox = new HBox ();
 			var downloadingLabel = new Label ();
-			downloadingLabel.Text = GettextCatalog.GetString ("Downloading...");
+			downloadingLabel.Text = GettextCatalog.GetString ("Downloading…");
 			downloadingHBox.PackStart (downloadingLabel);
 			cancelDownloadButton = new Button ();
 			cancelDownloadButton.Label = GettextCatalog.GetString ("Cancel");
@@ -113,20 +114,20 @@ namespace MonoDevelop.NuGetPackageExplorer
 			mainVBox.PackStart (downloadingHBox);
 			downloadingHBox.Visible = false;
 
-			packageId = AddMetadata (GettextCatalog.GetString ("Id"));
-			packageVersion = AddMetadata (GettextCatalog.GetString ("Version"));
-			packageTitle = AddMetadata (GettextCatalog.GetString ("Title"));
-			packageAuthors = AddMetadata (GettextCatalog.GetString ("Authors"));
-			packageOwners = AddMetadata (GettextCatalog.GetString ("Owners"));
-			packageTags = AddMetadata (GettextCatalog.GetString ("Tags"));
-			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Type"));
-			packageLanguage = AddMetadata (GettextCatalog.GetString ("Language"));
-			packageCopyright = AddMetadata (GettextCatalog.GetString ("Copyright"));
+			packageId = AddMetadata (GettextCatalog.GetString ("Id:"));
+			packageVersion = AddMetadata (GettextCatalog.GetString ("Version:"));
+			packageTitle = AddMetadata (GettextCatalog.GetString ("Title:"));
+			packageAuthors = AddMetadata (GettextCatalog.GetString ("Authors:"));
+			packageOwners = AddMetadata (GettextCatalog.GetString ("Owners:"));
+			packageTags = AddMetadata (GettextCatalog.GetString ("Tags:"));
+			packageTypes = AddMetadata (GettextCatalog.GetString ("Package Type:"));
+			packageLanguage = AddMetadata (GettextCatalog.GetString ("Language:"));
+			packageCopyright = AddMetadata (GettextCatalog.GetString ("Copyright:"));
 
 			// License.
-			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License"));
+			packageLicenseUrl = AddMetadataUrl (GettextCatalog.GetString ("License:"));
 
-			packageLicenseMetadataLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("License"));
+			packageLicenseMetadataLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("License:"));
 			packageLicenseMetadataLabelHBox.Spacing = 0;
 			var label = (Label)packageLicenseMetadataLabelHBox.Children.First ();
 			label.MarginRight = 5;
@@ -136,14 +137,14 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageLicenseMetadataWarningsVBox.Visible = false;
 			mainVBox.PackStart (packageLicenseMetadataWarningsVBox);
 
-			packageProjectUrl = AddMetadataUrl (GettextCatalog.GetString ("Project Page"));
-			packageIconUrl = AddMetadataUrl (GettextCatalog.GetString ("Icon"));
-			packageRequireLicenseAcceptance = AddMetadata (GettextCatalog.GetString ("Require License Acceptance"));
-			packageDevelopmentDependency = AddMetadata (GettextCatalog.GetString ("Development Dependency"));
-			packageMinClientVersion = AddMetadata (GettextCatalog.GetString ("Minimum Client Version"));
+			packageProjectUrl = AddMetadataUrl (GettextCatalog.GetString ("Project Page:"));
+			packageIconUrl = AddMetadataUrl (GettextCatalog.GetString ("Icon:"));
+			packageRequireLicenseAcceptance = AddMetadata (GettextCatalog.GetString ("Require License Acceptance:"));
+			packageDevelopmentDependency = AddMetadata (GettextCatalog.GetString ("Development Dependency:"));
+			packageMinClientVersion = AddMetadata (GettextCatalog.GetString ("Minimum Client Version:"));
 
 			// Summary.
-			AddMetadataHBox (GettextCatalog.GetString ("Summary"));
+			AddMetadataHBox (GettextCatalog.GetString ("Summary:"));
 			packageSummaryHBox = new HBox ();
 			mainVBox.PackStart (packageSummaryHBox);
 			packageSummary = new Label ();
@@ -151,7 +152,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageSummaryHBox.PackStart (packageSummary, true);
 
 			// Description.
-			AddMetadataHBox (GettextCatalog.GetString ("Description"));
+			AddMetadataHBox (GettextCatalog.GetString ("Description:"));
 			var hbox = new HBox ();
 			mainVBox.PackStart (hbox);
 			packageDescription = new Label ();
@@ -159,7 +160,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			hbox.PackStart (packageDescription, true);
 
 			// Release Notes.
-			AddMetadataHBox (GettextCatalog.GetString ("Release Notes"));
+			AddMetadataHBox (GettextCatalog.GetString ("Release Notes:"));
 			packageReleaseNotesHBox = new HBox ();
 			mainVBox.PackStart (packageReleaseNotesHBox);
 			packageReleaseNotes = new Label ();
@@ -167,7 +168,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageReleaseNotesHBox.PackStart (packageReleaseNotes, true);
 
 			// Repository metadata
-			packageRepositoryMetadataLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("Repository"));
+			packageRepositoryMetadataLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("Repository:"));
 			packageRepositoryMetadataLabelHBox.Visible = false;
 
 			packageRepositoryMetadataVBox = new VBox ();
@@ -175,32 +176,27 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageRepositoryMetadataVBox.Visible = false;
 			mainVBox.PackStart (packageRepositoryMetadataVBox);
 
-			packageRepositoryType = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Type"));
-			packageRepositoryUrl = AddMetadataUrl (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Url"));
-			packageRepositoryBranch = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Branch"));
-			packageRepositoryCommit = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Commit"));
+			packageRepositoryType = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Type:"));
+			packageRepositoryUrl = AddMetadataUrl (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Url:"));
+			packageRepositoryBranch = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Branch:"));
+			packageRepositoryCommit = AddMetadata (packageRepositoryMetadataVBox, GettextCatalog.GetString ("Commit:"));
 
 			// Dependencies.
-			AddMetadataHBox (GettextCatalog.GetString ("Dependencies"));
+			AddMetadataHBox (GettextCatalog.GetString ("Dependencies:"));
 			packageDependenciesVBox = new VBox ();
 			mainVBox.PackStart (packageDependenciesVBox);
 
 			// Framework assembly references.
-			packageFrameworkReferencesLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("Framework Assembly References"));
+			packageFrameworkReferencesLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("Framework Assembly References:"));
 			packageFrameworkReferencesVBox = new VBox ();
 			mainVBox.PackStart (packageFrameworkReferencesVBox);
 			packageFrameworkReferencesLabelHBox.Visible = false;
 
 			// References.
-			packageReferencesLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("References"));
+			packageReferencesLabelHBox = AddMetadataHBox (GettextCatalog.GetString ("References:"));
 			packageReferencesVBox = new VBox ();
 			mainVBox.PackStart (packageReferencesVBox);
 			packageReferencesLabelHBox.Visible = false;
-		}
-
-		static string BoldText (string text)
-		{
-			return string.Format ("<b>{0}</b>", text);
 		}
 
 		HBox AddMetadataHBox (VBox parentVBox, string name)
@@ -209,7 +205,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 			parentVBox.PackStart (hbox);
 
 			var label = new Label ();
-			label.Markup = BoldText (name);
+			label.Font = label.Font.WithWeight (FontWeight.Bold);
+			label.Text = name;
 			hbox.PackStart (label);
 
 			return hbox;
