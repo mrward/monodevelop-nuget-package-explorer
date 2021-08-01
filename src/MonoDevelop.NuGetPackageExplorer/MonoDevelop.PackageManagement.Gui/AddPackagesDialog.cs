@@ -433,6 +433,9 @@ namespace MonoDevelop.PackageManagement
 		void ClearPackages ()
 		{
 			packageStore.Clear ();
+			// Simulate GTK# behaviour where the selection would change on emptying the packages list.
+			// This ensures the package information is cleared.
+			PackagesListViewSelectionChanged (packagesListView, EventArgs.Empty);
 			ResetPackagesListViewScroll ();
 			ShowLoadingMessage ();
 			ShrinkImageCache ();
