@@ -26,6 +26,7 @@
 
 using System;
 using MonoDevelop.Core;
+using AppKit;
 using Xwt;
 using Xwt.Drawing;
 
@@ -53,6 +54,8 @@ namespace MonoDevelop.PackageManagement
 		public IDataField<Image> ImageField { get; set; }
 
 		public double CellWidth { get; set; }
+
+		public NSTableView ParentTableView { get; set; }
 
 		protected override void OnDraw (Context ctx, Rectangle cellArea)
 		{
@@ -107,11 +110,23 @@ namespace MonoDevelop.PackageManagement
 
 		void UpdateTextColor (Context ctx)
 		{
-			if (Selected) {
+			if (Selected && ParentHasFocus ()) {
 				ctx.SetColor (Styles.CellTextSelectionColor);
 			} else {
 				ctx.SetColor (Styles.CellTextColor);
 			}
+		}
+
+		/// <summary>
+		/// Neither CellView.HasFocus nor ParentWidget.HasFocus return true when the parent
+		/// NSTableView has the focus so as a workaround check the NSTableView directly.
+		/// </summary>
+		bool ParentHasFocus ()
+		{
+			if (ParentTableView == null)
+				return Selected; // Default to old behaviour.
+
+			return ParentTableView.Window?.FirstResponder == ParentTableView;
 		}
 
 		void DrawPackageImage (Context ctx, Rectangle cellArea)
@@ -122,7 +137,7 @@ namespace MonoDevelop.PackageManagement
 				image = defaultPackageImage;
 			}
 
-			if (Selected)
+			if (Selected && ParentHasFocus ())
 				image = image.WithStyles ("sel");
 
 			if (PackageImageNeedsResizing (image)) {

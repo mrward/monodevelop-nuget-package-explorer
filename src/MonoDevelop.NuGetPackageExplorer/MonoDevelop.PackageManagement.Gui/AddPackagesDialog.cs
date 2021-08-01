@@ -131,6 +131,7 @@ namespace MonoDevelop.PackageManagement
 			viewModel.Dispose ();
 			DisposeExistingTimer ();
 			DisposePopulatePackageVersionsTimer ();
+			packageCellView.ParentTableView = null;
 			packageStore.Clear ();
 			viewModel = null;
 			base.Dispose (disposing);
@@ -160,10 +161,14 @@ namespace MonoDevelop.PackageManagement
 			packagesListView.VerticalScrollControl.ValueChanged += PackagesListViewScrollValueChanged;
 
 			var listView = packagesListView.Surface.NativeWidget as NSView;
-			if (listView is NSScrollView scroll)
+			if (listView is NSScrollView scroll) {
 				listView = scroll.DocumentView as NSView;
+			}
 			if (listView is NSTableView tableView)
+			{
 				tableView.UsesAlternatingRowBackgroundColors = true;
+				packageCellView.ParentTableView = tableView;
+			}
 		}
 
 		void AddCellViewsToListView ()
