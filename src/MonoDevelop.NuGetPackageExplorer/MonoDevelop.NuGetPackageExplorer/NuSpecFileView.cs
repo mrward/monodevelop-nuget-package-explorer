@@ -25,30 +25,62 @@
 // THE SOFTWARE.
 //
 
+using System;
 using System.Xml.Linq;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Utilities;
 using MonoDevelop.Components;
-using MonoDevelop.Ide.Editor;
+using MonoDevelop.Ide.Composition;
 
 namespace MonoDevelop.NuGetPackageExplorer
 {
-	public class NuSpecFileView
+	public class NuSpecFileView : IDisposable
 	{
-		TextEditor textEditor;
+		ICocoaTextViewHost textViewHost;
 
 		public NuSpecFileView ()
 		{
-			textEditor = TextEditorFactory.CreateNewEditor ();
-			textEditor.MimeType = "application/xml";
-			textEditor.IsReadOnly = true;
+			var textBufferFactory = CompositionManager.Instance.GetExportedValue<ITextBufferFactoryService> ();
+			var contentTypeRegistry = CompositionManager.Instance.GetExportedValue<IContentTypeRegistryService> ();
+
+			IContentType contentType = contentTypeRegistry.GetContentType ("xml");
+
+			var optionsFactory = CompositionManager.Instance.GetExportedValue<IEditorOptionsFactoryService> ();
+			IEditorOptions options = optionsFactory.CreateOptions ();
+			options.SetOptionValue (DefaultTextViewHostOptions.ChangeTrackingId, false);
+			options.SetOptionValue (DefaultTextViewHostOptions.GlyphMarginId, false);
+			options.SetOptionValue (DefaultTextViewHostOptions.LineNumberMarginId, false);
+			options.SetOptionValue (DefaultTextViewHostOptions.OutliningMarginId, false);
+			options.SetOptionValue (DefaultTextViewHostOptions.ShowEnhancedScrollBarOptionId, false);
+			options.SetOptionValue (DefaultCocoaViewOptions.ZoomLevelId, ZoomConstants.DefaultZoom);
+
+			var editorFactory = CompositionManager.Instance.GetExportedValue<ICocoaTextEditorFactoryService> ();
+			ITextViewRoleSet roles = editorFactory.CreateTextViewRoleSet (
+				PredefinedTextViewRoles.Interactive
+			);
+			ITextBuffer textBuffer = textBufferFactory.CreateTextBuffer (string.Empty, contentType);
+			ICocoaTextView textView = editorFactory.CreateTextView (textBuffer, roles, options);
+			textViewHost = editorFactory.CreateTextViewHost (textView, true);
 		}
 
 		public Control Control {
-			get { return textEditor; }
+			get { return textViewHost.HostControl; }
 		}
 
 		public void ShowXml (XDocument document)
 		{
-			textEditor.Text = document.ToString ();
+			ITextBuffer textBuffer = textViewHost.TextView.TextBuffer;
+			var span = new Span (0, textBuffer.CurrentSnapshot.Length);
+			textBuffer.Replace (span, document.ToString ());
+		}
+
+		public void Dispose ()
+		{
+			if (textViewHost != null) {
+				textViewHost.Close ();
+				textViewHost = null;
+			}
 		}
 	}
 }

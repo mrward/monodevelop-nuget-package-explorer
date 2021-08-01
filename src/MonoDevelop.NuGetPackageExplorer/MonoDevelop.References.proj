@@ -2,6 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MDBinDir Condition=" '$(MDBinDir)' == '' ">..\..\..\monodevelop-8.8\main\build\bin</MDBinDir>
+    <MDBinDir>\Applications\Visual Studio %28Preview%29.app\Contents\MonoBundle</MDBinDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Addins">
@@ -23,6 +24,30 @@
      <Reference Include="System.Collections.Immutable">
       <Private>False</Private>
       <HintPath>$(MDBinDir)\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.CoreUtility">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\Microsoft.VisualStudio.CoreUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Text.Data">
+      <HintPath>$(MDBinDir)\Microsoft.VisualStudio.Text.Data.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Text.Logic">
+      <HintPath>$(MDBinDir)\Microsoft.VisualStudio.Text.Logic.dll</HintPath>
+      <Private>False</Private>
+   </Reference>
+    <Reference Include="Microsoft.VisualStudio.Text.UI">
+      <HintPath>$(MDBinDir)\Microsoft.VisualStudio.Text.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Text.UI.Cocoa">
+      <HintPath>$(MDBinDir)\Microsoft.VisualStudio.Text.UI.Cocoa.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Xamarin.Mac">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\Xamarin.Mac.dll</HintPath>
     </Reference>
     <Reference Include="Xwt">
       <Private>False</Private>
