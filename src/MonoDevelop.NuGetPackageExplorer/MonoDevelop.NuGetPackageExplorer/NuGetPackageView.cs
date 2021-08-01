@@ -134,6 +134,12 @@ namespace MonoDevelop.NuGetPackageExplorer
 			var view = topScrollView.Surface.NativeWidget as NSView;
 			view.SetFrameSize (new CGSize (600, view.Frame.Size.Height));
 
+			var splitView = pane.Surface.NativeWidget as NSSplitView;
+			if (splitView != null) {
+				splitView.Identifier = "MonoDevelop.NuGetPackageExplorer.NuGetPackageView.SplitView";
+				splitView.AutosaveName = "MonoDevelop.NuGetPackageExplorer.NuGetPackageView.SplitView.Autosave";
+			}
+
 			Content = pane;
 		}
 
