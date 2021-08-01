@@ -113,25 +113,25 @@ namespace MonoDevelop.NuGetPackageExplorer
 		{
 			pane = new HPaned ();
 
-			// Top pane.
-			var topScrollView = new ScrollView ();
+			// Left pane.
+			var leftScrollView = new ScrollView ();
 			packageMetadataView = new NuGetPackageMetadataView ();
 			packageMetadataView.OnCancelDownload = OnCancelDownload;
 			packageMetadataView.OnOpenPackageDependency = OnOpenPackageDependency;
 			packageMetadataView.OnOpenFile = OnOpenPackageFile;
-			topScrollView.Content = packageMetadataView;
-			pane.Panel1.Content = topScrollView;
+			leftScrollView.Content = packageMetadataView;
+			pane.Panel1.Content = leftScrollView;
 
-			// Bottom pane.
-			var bottomScrollView = new ScrollView ();
+			// Right pane.
+			var rightScrollView = new ScrollView ();
 			packageContentsTreeView = new NuGetPackageContentsView ();
 			packageContentsTreeView.OnOpenFile = OnOpenPackageFile;
-			bottomScrollView.Content = packageContentsTreeView;
-			pane.Panel2.Content = bottomScrollView;
+			rightScrollView.Content = packageContentsTreeView;
+			pane.Panel2.Content = rightScrollView;
 
 			// Set an initial width for the metadata view. Otherwise the splitter is all the way
 			// over to the right hand side of the window.
-			var view = topScrollView.Surface.NativeWidget as NSView;
+			var view = leftScrollView.Surface.NativeWidget as NSView;
 			view.SetFrameSize (new CGSize (600, view.Frame.Size.Height));
 
 			var splitView = pane.Surface.NativeWidget as NSSplitView;
