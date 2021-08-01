@@ -30,6 +30,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AppKit;
+using CoreGraphics;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.PackageManagement;
@@ -126,6 +128,11 @@ namespace MonoDevelop.NuGetPackageExplorer
 			packageContentsTreeView.OnOpenFile = OnOpenPackageFile;
 			bottomScrollView.Content = packageContentsTreeView;
 			pane.Panel2.Content = bottomScrollView;
+
+			// Set an initial width for the metadata view. Otherwise the splitter is all the way
+			// over to the right hand side of the window.
+			var view = topScrollView.Surface.NativeWidget as NSView;
+			view.SetFrameSize (new CGSize (600, view.Frame.Size.Height));
 
 			Content = pane;
 		}
