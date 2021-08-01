@@ -90,6 +90,12 @@ namespace MonoDevelop.PackageManagement
 		{
 			base.OnShown ();
 
+			// Have to set CanGetFocus to true here so focus can be set to the packages list view
+			// when a check box is clicked. It is true by default but AcceptFirstResponder returns
+			// false when the ListView is initialized so calling SetFocus would not call
+			// MakeFirstResponder to give the ListView focus.
+			packagesListView.CanGetFocus = true;
+
 			// Set focus here after the window is displayed. With Xamarin.Mac as
 			// the XWT toolkit engine setting focus before here does not work.
 			UpdatePackageSearchEntryWithInitialText (initialSearch);
@@ -558,6 +564,10 @@ namespace MonoDevelop.PackageManagement
 		void PackageCheckCellViewPackageChecked (object sender, WidgetEventArgs e)
 		{
 			PackagesListRowActivated (sender, new ListViewRowEventArgs (packagesListView.CurrentEventRow));
+
+			// NSTableView does not select the row when the check box is clicked, unlike GTK#, so do it now in code.
+			packagesListView.SelectRow (packagesListView.CurrentEventRow);
+			packagesListView.SetFocus ();
 		}
 
 		void PackagesListRowActivated (object sender, ListViewRowEventArgs e)
