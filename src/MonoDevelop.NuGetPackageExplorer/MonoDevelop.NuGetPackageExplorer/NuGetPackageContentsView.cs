@@ -172,19 +172,18 @@ namespace MonoDevelop.NuGetPackageExplorer
 			return null;
 		}
 
-		protected override void OnRowActivated (TreeViewRowEventArgs a)
-		{
-			base.OnRowActivated (a);
-
-			OpenSelectedFile ();
-		}
-
 		protected override void OnButtonPressed (ButtonEventArgs args)
 		{
 			base.OnButtonPressed (args);
 
-			if (Platform.IsMac &&
-				args.Button == PointerButton.Left &&
+			if (args.MultiplePress == 2) {
+				// Handle double click here. OnRowActivated does not seem to be called
+				// with VS Mac 17.0 so cannot override that method and use that.
+				OpenSelectedFile ();
+				return;
+			}
+
+			if (args.Button == PointerButton.Left &&
 				Keyboard.CurrentModifiers == ModifierKeys.Control) {
 				// Allow control + left click on the Mac
 			} else if (args.Button != PointerButton.Right) {
