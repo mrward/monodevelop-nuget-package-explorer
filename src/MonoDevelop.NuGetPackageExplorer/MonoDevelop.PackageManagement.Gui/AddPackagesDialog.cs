@@ -98,8 +98,8 @@ namespace MonoDevelop.PackageManagement
 
 			// Set focus here after the window is displayed. With Xamarin.Mac as
 			// the XWT toolkit engine setting focus before here does not work.
-			UpdatePackageSearchEntryWithInitialText (initialSearch);
 			packageSearchEntry.SetFocus ();
+			UpdatePackageSearchEntryWithInitialText (initialSearch);
 		}
 
 		public bool ShowPreferencesForPackageSources { get; private set; }
