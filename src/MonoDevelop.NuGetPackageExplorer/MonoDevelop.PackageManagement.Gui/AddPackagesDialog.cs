@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppKit;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Projects;
@@ -157,6 +158,12 @@ namespace MonoDevelop.PackageManagement
 			packagesListView.SelectionChanged += PackagesListViewSelectionChanged;
 			packagesListView.RowActivated += PackagesListRowActivated;
 			packagesListView.VerticalScrollControl.ValueChanged += PackagesListViewScrollValueChanged;
+
+			var listView = packagesListView.Surface.NativeWidget as NSView;
+			if (listView is NSScrollView scroll)
+				listView = scroll.DocumentView as NSView;
+			if (listView is NSTableView tableView)
+				tableView.UsesAlternatingRowBackgroundColors = true;
 		}
 
 		void AddCellViewsToListView ()
@@ -479,11 +486,6 @@ namespace MonoDevelop.PackageManagement
 			if (packageViewModel.HasIconUrl) {
 				imageLoader.LoadFrom (packageViewModel.IconUrl, row);
 			}
-		}
-
-		bool IsOddRow (int row)
-		{
-			return (row % 2) == 0;
 		}
 
 		void ImageLoaded (object sender, ImageLoadedEventArgs e)
