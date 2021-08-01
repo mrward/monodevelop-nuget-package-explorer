@@ -163,7 +163,7 @@ namespace MonoDevelop.PackageManagement
 			// Package information
 			packageInfoVBox = new VBox ();
 			packageInfoVBox.WidthRequest = 338;
-			packageInfoVBox.Margin = new WidgetSpacing (15, 12, 15, 12);
+			packageInfoVBox.Margin = new WidgetSpacing (15, 12, 15, 22);
 
 			var packageInfoScrollView = new ScrollView ();
 			packageInfoScrollView.BorderVisible = false;
