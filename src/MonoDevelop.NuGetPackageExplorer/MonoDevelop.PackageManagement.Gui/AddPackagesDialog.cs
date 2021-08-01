@@ -64,14 +64,14 @@ namespace MonoDevelop.PackageManagement
 		IDisposable populatePackageVersionsTimer;
 		const int MaxVersionsToPopulate = 100;
 		List<PackageSearchResultViewModel> selectedPackages = new List<PackageSearchResultViewModel> ();
+		string initialSearch;
 
 		public AddPackagesDialog (AllPackagesViewModel viewModel, string initialSearch = null)
 		{
 			this.viewModel = viewModel;
+			this.initialSearch = initialSearch;
 
 			Build ();
-
-			UpdatePackageSearchEntryWithInitialText (initialSearch);
 
 			InitializeListView ();
 			UpdateAddPackagesButton ();
@@ -85,6 +85,16 @@ namespace MonoDevelop.PackageManagement
 			this.packageSearchEntry.Activated += PackageSearchEntryActivated;
 			this.packageVersionComboBox.SelectionChanged += PackageVersionChanged;
 			imageLoader.Loaded += ImageLoaded;
+		}
+
+		protected override void OnShown ()
+		{
+			base.OnShown ();
+
+			// Set focus here after the window is displayed. With Xamarin.Mac as
+			// the XWT toolkit engine setting focus before here does not work.
+			UpdatePackageSearchEntryWithInitialText (initialSearch);
+			packageSearchEntry.SetFocus ();
 		}
 
 		public bool ShowPreferencesForPackageSources { get; private set; }
