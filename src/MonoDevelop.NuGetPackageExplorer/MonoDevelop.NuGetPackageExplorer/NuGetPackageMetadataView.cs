@@ -277,6 +277,8 @@ namespace MonoDevelop.NuGetPackageExplorer
 			NuGetVersion version = reader.GetMinClientVersion ();
 			if (version != null)
 				packageMinClientVersion.Text = version.ToNormalizedString ();
+
+			Content.Surface.Reallocate ();
 		}
 
 		internal void ShowMetadata (PackageSearchResultViewModel package)
