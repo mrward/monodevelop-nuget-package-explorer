@@ -134,7 +134,8 @@ namespace MonoDevelop.PackageManagement
 			loadingSpinnerHBox.HorizontalPlacement = WidgetPlacement.Center;
 			var loadingSpinner = new Spinner ();
 			loadingSpinner.Animate = true;
-			loadingSpinner.MinWidth = 20;
+			loadingSpinner.WidthRequest = 20;
+			loadingSpinner.HeightRequest = 20;
 			loadingSpinnerHBox.PackStart (loadingSpinner);
 
 			loadingSpinnerLabel = new Label ();
