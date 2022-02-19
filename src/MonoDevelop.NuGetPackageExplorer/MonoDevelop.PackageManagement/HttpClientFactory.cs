@@ -67,9 +67,9 @@ namespace MonoDevelop.PackageManagement
 			}
 
 			HttpMessageHandler innerHandler = messageHandler;
-			messageHandler = new StsAuthenticationHandler (packageSource, TokenStore.Instance) {
-				InnerHandler = messageHandler
-			};
+			//messageHandler = new StsAuthenticationHandler (packageSource, TokenStore.Instance) {
+			//	InnerHandler = messageHandler
+			//};
 
 			innerHandler = messageHandler;
 

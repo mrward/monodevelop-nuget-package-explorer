@@ -3,8 +3,22 @@
   <PropertyGroup>
     <MDBinDir Condition=" '$(MDBinDir)' == '' ">..\..\..\monodevelop-8.8\main\build\bin</MDBinDir>
     <MDBinDir>\Applications\Visual Studio %28Preview%29.app\Contents\MonoBundle</MDBinDir>
+    <MonoInstallRootDirectory>$([MSBuild]::NormalizeDirectory('/Library/Frameworks/Mono.framework/Versions/Current'))</MonoInstallRootDirectory>
+    <GtkInstallRootDirectory>$(MonoInstallRootDirectory)\lib\mono\gtk-sharp-2.0</GtkInstallRootDirectory>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <HintPath>$(GtkInstallRootDirectory)\gdk-sharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <HintPath>$(GtkInstallRootDirectory)\glib-sharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <HintPath>$(GtkInstallRootDirectory)\gtk-sharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Mono.Addins">
       <Private>False</Private>
       <HintPath>$(MDBinDir)\Mono.Addins.dll</HintPath>
@@ -46,12 +60,72 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Xamarin.Mac">
+      <HintPath>/usr/local/share/dotnet/packs/Microsoft.macOS.Ref/12.0.101-preview.10.251/ref/net6.0/Xamarin.Mac.dll</HintPath>
       <Private>False</Private>
-      <HintPath>$(MDBinDir)\Xamarin.Mac.dll</HintPath>
     </Reference>
     <Reference Include="Xwt">
       <Private>False</Private>
       <HintPath>$(MDBinDir)\Xwt.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Commands">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Commands.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Common">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Configuration">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Credentials">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Credentials.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.DependencyResolver.Core">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.DependencyResolver.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Frameworks">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Frameworks.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Indexing">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Indexing.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.LibraryModel">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.LibraryModel.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.PackageManagement">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.PackageManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Packaging">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Packaging.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.ProjectModel">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.ProjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Protocol">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Protocol.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Resolver">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Resolver.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Versioning">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\NuGet.Versioning.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net">
+      <Private>False</Private>
+      <HintPath>$(MDBinDir)\Lucene.Net.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

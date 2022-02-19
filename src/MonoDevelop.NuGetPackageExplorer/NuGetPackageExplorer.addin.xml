@@ -1,8 +1,6 @@
 ﻿<ExtensionModel>
 	<Runtime>
 		<Import assembly="MonoDevelop.NuGetPackageExplorer.dll" />
-		<Import assembly="NuGet.Merged.dll" />
-		<Import file="ICSharpCode.SharpZipLib.dll" />
 	</Runtime>
 
 	<Extension path="/MonoDevelop/Ide/Composition">
