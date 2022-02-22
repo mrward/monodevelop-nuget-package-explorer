@@ -34,6 +34,7 @@ using MonoDevelop.Projects;
 using NuGet.Configuration;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using ObjCRuntime;
 using Xwt;
 using Xwt.Drawing;
 using Catalog = MonoDevelop.Core.GettextCatalog;
