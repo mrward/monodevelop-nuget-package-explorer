@@ -7,6 +7,11 @@
     <OutputPath>..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NuGet">
+      <HintPath>..\..\lib\NuGet.Merged.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="NuGetPackageExplorer.addin.xml">
       <LogicalName>NuGetPackageExplorer.addin.xml</LogicalName>
     </EmbeddedResource>
