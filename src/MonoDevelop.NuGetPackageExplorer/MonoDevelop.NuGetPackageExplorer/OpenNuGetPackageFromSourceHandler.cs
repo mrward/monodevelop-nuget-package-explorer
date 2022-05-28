@@ -111,6 +111,18 @@ namespace MonoDevelop.NuGetPackageExplorer
 			if (!packages.Any ())
 				return;
 
+			// HACK: Fix the layout not initialized by the OpenDocument call
+			// when passing a controller. Without presenting the Workbench the
+			// main window is opened without any layout and the .nupkg file is
+			// not shown. OpenDocument calls Workbench.EnsureShown however this
+			// does nothing since Window.Visible is true even though the main
+			// IDE window has not been shown yet.
+			if (IdeApp.Workbench.Layouts.Count == 0) {
+				// Zero layouts should mean that the workbench has never been
+				// shown. Present it now to ensure the .nupkg file is displayed.
+				IdeApp.Workbench.Present ();
+			}
+
 			foreach (PackageSearchResultViewModel package in packages) {
 				package.Parent = null;
 
