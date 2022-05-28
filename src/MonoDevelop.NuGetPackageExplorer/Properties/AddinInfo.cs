@@ -29,14 +29,14 @@ using Mono.Addins;
 
 [assembly:Addin ("NuGetPackageExplorer",
                  Namespace = "MonoDevelop",
-                 Version = "0.8",
+                 Version = "0.9",
                  Category = "IDE extensions")]
 
 [assembly:AddinName ("NuGet Package Explorer")]
 [assembly:AddinDescription ("Open and view NuGet packages (.nupkg).")]
 
-[assembly:AddinDependency ("Core", "17.0")]
-[assembly:AddinDependency ("Ide", "17.0")]
-[assembly:AddinDependency ("PackageManagement", "17.0")]
-[assembly:AddinDependency ("DotNetCore", "17.0")]
+[assembly:AddinDependency ("Core", "17.3")]
+[assembly:AddinDependency ("Ide", "17.3")]
+[assembly:AddinDependency ("PackageManagement", "17.3")]
+[assembly:AddinDependency ("DotNetCore", "17.3")]
 
