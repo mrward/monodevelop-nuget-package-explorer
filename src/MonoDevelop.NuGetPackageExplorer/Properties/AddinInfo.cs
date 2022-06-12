@@ -29,7 +29,7 @@ using Mono.Addins;
 
 [assembly:Addin ("NuGetPackageExplorer",
                  Namespace = "MonoDevelop",
-                 Version = "0.9",
+                 Version = "0.10",
                  Category = "IDE extensions")]
 
 [assembly:AddinName ("NuGet Package Explorer")]
