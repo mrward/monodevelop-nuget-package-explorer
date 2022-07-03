@@ -50,6 +50,7 @@ namespace MonoDevelop.NuGetPackageExplorer
 		public NuGetPackageDisplayBinding (NuGetPackageView packageView)
 		{
 			this.packageView = packageView;
+			DocumentTitle = packageView.ContentName;
 		}
 
 		protected override bool ControllerIsViewOnly {
