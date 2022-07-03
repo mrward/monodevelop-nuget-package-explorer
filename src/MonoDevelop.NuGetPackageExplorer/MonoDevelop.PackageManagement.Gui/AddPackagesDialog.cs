@@ -39,6 +39,7 @@ using Xwt;
 using Xwt.Drawing;
 using Catalog = MonoDevelop.Core.GettextCatalog;
 using PropertyChangedEventArgs = System.ComponentModel.PropertyChangedEventArgs;
+using nfloat = System.Runtime.InteropServices.NFloat;
 
 namespace MonoDevelop.PackageManagement
 {
